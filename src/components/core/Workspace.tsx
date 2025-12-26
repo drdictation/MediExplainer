@@ -41,6 +41,16 @@ export function Workspace() {
                         console.log('[Workspace] Payment verified by server.');
                         setIsPaid(true);
 
+                        // Fire Google Ads Conversion
+                        if (typeof window.gtag === 'function') {
+                            window.gtag('event', 'conversion', {
+                                'send_to': 'AW-17755885311/rtPjCMC9rNcbEP-d1ZJC',
+                                'value': 5.0,
+                                'currency': 'USD',
+                                'transaction_id': sessionId
+                            });
+                        }
+
                         // Restore state
                         const { file: savedFile, redactions: savedRedactions } = await loadAppState();
 

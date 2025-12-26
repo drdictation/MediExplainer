@@ -14,3 +14,9 @@ export interface PageDimensions {
     width: number;
     height: number;
 }
+
+declare global {
+    interface Window {
+        gtag: (...args: any[]) => void;
+    }
+}
