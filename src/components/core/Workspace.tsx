@@ -112,6 +112,13 @@ export function Workspace() {
         if (!file || exporting) return;
         setExporting(true);
         try {
+            console.log('[Workspace] Starting export...', {
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                redactionCount: redactions.length,
+                isPaid
+            });
             const pdfBytes = await exportRedactedPDF(file, redactions, isPaid);
 
             const blob = new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
@@ -123,10 +130,11 @@ export function Workspace() {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+            console.log('[Workspace] Export successful');
 
-        } catch (err) {
-            console.error(err);
-            alert('Export failed.');
+        } catch (err: any) {
+            console.error('[Workspace] Export error:', err);
+            alert(`Export failed: ${err.message || err}`);
         } finally {
             setExporting(false);
         }

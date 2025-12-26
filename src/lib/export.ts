@@ -9,8 +9,10 @@ export async function exportRedactedPDF(
     isPaid: boolean
 ): Promise<Uint8Array> {
     const arrayBuffer = await originalFile.arrayBuffer();
+    console.log('[Export] Loaded array buffer, size:', arrayBuffer.byteLength);
     const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
     const numPages = pdf.numPages;
+    console.log('[Export] PDF loaded, pages:', numPages);
 
     const newPdf = await PDFDocument.create();
 
@@ -25,6 +27,7 @@ export async function exportRedactedPDF(
         // Wait, exporting as image might need higher quality? 
         // 2.0 is often good enough for screen reading (150-200 DPI equivalent)
         await renderPageToCanvas(page, canvas, 2.0);
+        console.log(`[Export] Page ${i} rendered to canvas`);
 
         const ctx = canvas.getContext('2d');
         if (!ctx) continue;
