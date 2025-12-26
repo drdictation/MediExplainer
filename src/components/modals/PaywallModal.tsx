@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface PaywallModalProps {
     isOpen: boolean;
@@ -6,9 +7,9 @@ interface PaywallModalProps {
 }
 
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
-    if (!isOpen) return null;
+    const [isLoading, setIsLoading] = useState(false);
 
-    const stripeLink = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -32,16 +33,29 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 </div>
 
                 <button
-                    onClick={() => {
-                        if (stripeLink) {
-                            window.open(stripeLink, '_blank');
-                            onClose();
-                        } else {
-                            alert('Payment link is not configured (VITE_STRIPE_PAYMENT_LINK missing).');
+                    onClick={async () => {
+                        setIsLoading(true);
+                        try {
+                            const response = await fetch('/api/create-checkout-session', {
+                                method: 'POST',
+                            });
+                            const { url, error } = await response.json();
+                            if (url) {
+                                window.location.href = url;
+                            } else {
+                                throw new Error(error || 'Failed to create checkout session');
+                            }
+                        } catch (err: any) {
+                            console.error(err);
+                            alert(err.message || 'Payment service unavailable. Please try again later.');
+                        } finally {
+                            setIsLoading(false);
                         }
                     }}
-                    className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
+                    {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                     Finalize & Export PDF ($5)
                 </button>
             </div>
