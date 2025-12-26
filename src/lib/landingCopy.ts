@@ -10,7 +10,7 @@ export interface RouteConfig {
 export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/': {
         path: '/',
-        title: 'Redact PDF Online | CleanSend',
+        title: 'Redact PDF Online | RedactPDF',
         metaDescription: 'Black out sensitive information from PDFs directly in your browser. No server upload—files never leave your device.',
         h1: 'Black Out Sensitive Data in PDFs',
         subhead: 'Redact text permanently before sharing. Your files are processed 100% locally in your browser and are never uploaded to a server.',
@@ -23,7 +23,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     },
     '/redact-bank-statement': {
         path: '/redact-bank-statement',
-        title: 'Redact Bank Statements from PDFs | CleanSend',
+        title: 'Redact Bank Statements from PDFs | RedactPDF',
         metaDescription: 'Black out account numbers and transaction details in your bank statement. No server upload—files stay on your device.',
         h1: 'Black Out Sensitive Data on Bank Statements',
         subhead: 'Hide account numbers and balances before sharing. Your bank statement is processed locally in your browser and never sent to a server.',
@@ -36,7 +36,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     },
     '/redact-id': {
         path: '/redact-id',
-        title: 'Redact ID Documents from PDFs | CleanSend',
+        title: 'Redact ID Documents from PDFs | RedactPDF',
         metaDescription: 'Black out sensitive details on ID documents. No server upload—redact passports and licenses securely in your browser.',
         h1: 'Black Out Details on ID Documents',
         subhead: 'Hide personal numbers and addresses before sharing. Your ID document stays on your device and is never uploaded to the cloud.',
@@ -49,7 +49,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     },
     '/redact-visa': {
         path: '/redact-visa',
-        title: 'Redact Visa Documents from PDFs | CleanSend',
+        title: 'Redact Visa Documents from PDFs | RedactPDF',
         metaDescription: 'Redact sensitive info from visa documents. No server upload—files are processed locally in your browser.',
         h1: 'Black Out Sensitive Info on Visas',
         subhead: 'Hide personal details manually before sharing. Your visa documents are processed locally on your device, ensuring privacy.',
@@ -62,7 +62,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     },
     '/redact-rental-application': {
         path: '/redact-rental-application',
-        title: 'Redact Documents for Rental Applications | CleanSend',
+        title: 'Redact Documents for Rental Applications | RedactPDF',
         metaDescription: 'Prepare rental application documents by blacking out sensitive data. No server upload—files never leave your computer.',
         h1: 'Black Out Data for Rental Applications',
         subhead: 'Hide SSNs and account details before submitting. Your documents are processed 100% locally in your browser.',
