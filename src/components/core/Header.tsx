@@ -33,7 +33,7 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
                                 <ShieldCheck className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900 tracking-tight">RedactPDF</h1>
+                                <h1 className="text-xl font-bold text-gray-900 tracking-tight">MediExplainer</h1>
                             </div>
                         </Link>
                     </div>

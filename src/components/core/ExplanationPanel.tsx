@@ -83,7 +83,7 @@ export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnloc
     );
 
     const renderPreview = () => (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-180px)]">
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                 <h4 className="font-semibold text-blue-900 flex items-center gap-2 mb-2">
                     <Activity className="w-4 h-4" />
