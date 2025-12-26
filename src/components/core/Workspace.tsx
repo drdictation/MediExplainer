@@ -71,6 +71,19 @@ export function Workspace() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        // Warning before leaving if paid session is active
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isPaid) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for most browsers
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isPaid]);
+
     const handleFileSelect = async (selectedFile: File) => {
         setIsProcessing(true);
         try {

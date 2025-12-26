@@ -7,7 +7,12 @@ const STORE_KEY_REDACTIONS = 'cleansend_redactions';
 export async function saveAppState(file: File, redactions: Redaction[]) {
     console.log('[Storage] Saving app state...', { fileName: file.name, fileSize: file.size, redactionCount: redactions.length });
     try {
-        await set(STORE_KEY_FILE, file);
+        const arrayBuffer = await file.arrayBuffer();
+        await set(STORE_KEY_FILE, {
+            data: arrayBuffer,
+            name: file.name,
+            type: file.type
+        });
         await set(STORE_KEY_REDACTIONS, redactions);
         console.log('[Storage] App state saved successfully');
     } catch (err) {
@@ -18,10 +23,16 @@ export async function saveAppState(file: File, redactions: Redaction[]) {
 export async function loadAppState(): Promise<{ file: File | undefined; redactions: Redaction[] | undefined }> {
     console.log('[Storage] Loading app state...');
     try {
-        const file = await get<File>(STORE_KEY_FILE);
+        const savedData = await get<{ data: ArrayBuffer; name: string; type: string }>(STORE_KEY_FILE);
         const redactions = await get<Redaction[]>(STORE_KEY_REDACTIONS);
-        console.log('[Storage] App state loaded:', { fileFound: !!file, redactionsFound: !!redactions, redactionCount: redactions?.length });
-        return { file, redactions };
+
+        if (savedData) {
+            const file = new File([savedData.data], savedData.name, { type: savedData.type });
+            console.log('[Storage] App state loaded & File reconstructed:', { fileName: file.name, redactionCount: redactions?.length });
+            return { file, redactions };
+        }
+
+        return { file: undefined, redactions: undefined };
     } catch (err) {
         console.error('Failed to load app state:', err);
         return { file: undefined, redactions: undefined };

@@ -19,7 +19,7 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
     // Unpaid: Preview Mode · Watermark Applied
     // Paid: Export Mode · Watermark Removed
     const statusText = isPaid
-        ? "Export Mode · Watermark Removed"
+        ? "Session Active · Valid until tab closed"
         : "Preview Mode · Watermark Applied";
 
     return (
