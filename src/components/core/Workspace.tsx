@@ -63,16 +63,16 @@ export function Workspace() {
                         // Restore state
                         const restored = await loadAppState() as any;
                         const savedFile = restored.file;
-                        const savedExplanation = restored.fullExplanation;
-                        const savedImages = restored.images;
-                        const savedText = restored.rawText;
-                        const savedPreview = restored.previewData;
+                        let savedExplanation = restored.fullExplanation;
+                        let savedImages = restored.images;
+                        let savedText = restored.rawText;
+                        let savedPreview = restored.previewData;
 
                         if (savedFile) {
-                            console.log('[Workspace] Saved file found, restoring state WITHOUT re-analysis...');
+                            console.log('[Workspace] Saved file found. Restoring...');
                             setFile(savedFile);
 
-                            // Restore UI Pages ONLY (Fast)
+                            // 1. Load PDF Pages (Required for UI)
                             const doc = await loadPDF(savedFile);
                             const loadedPages: pdfjsLib.PDFPageProxy[] = [];
                             for (let i = 1; i <= doc.numPages; i++) {
@@ -80,14 +80,30 @@ export function Workspace() {
                             }
                             setPages(loadedPages);
 
-                            // Restore Analysis Data directly
-                            if (savedText) setRawText(savedText);
-                            if (savedImages) setScannedImages(savedImages);
-                            if (savedPreview) setPreviewData(savedPreview);
-                            if (savedExplanation) setFullExplanation(savedExplanation);
+                            // 2. Restore or Regenerate Data
+                            // If we have saved data, use it. If not, REGENERATE IT NOW so we don't show "Analyzing..." later.
 
-                            // If we lacked text/preview for some reason, THEN trigger analysis? 
-                            // Unlikely if they got to payment.
+                            if (!savedText) {
+                                console.log('[Workspace] Missing saved text. Re-extracting...');
+                                const { fullText, images } = await extractTextFromPDF(doc);
+                                savedText = fullText;
+                                if (!savedImages) savedImages = images; // Recover images too if missing
+                            }
+                            setRawText(savedText);
+
+                            if (savedImages && savedImages.length > 0) {
+                                setScannedImages(savedImages);
+                            }
+
+                            if (!savedPreview) {
+                                console.log('[Workspace] Missing saved preview. Re-generating...');
+                                savedPreview = await generatePreview(doc);
+                            }
+                            setPreviewData(savedPreview);
+
+                            if (savedExplanation) {
+                                setFullExplanation(savedExplanation);
+                            }
                         }
 
                         // Clear state after restoring
