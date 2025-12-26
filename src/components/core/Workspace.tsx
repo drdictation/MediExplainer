@@ -265,94 +265,91 @@ export function Workspace() {
         );
     }
 
-            </div >
-        );
-}
 
-if (isRestoring || !file) {
+    if (isRestoring || !file) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-gray-50 flex-col gap-4">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                <div className="text-xl font-semibold text-gray-700">Restoring your session...</div>
+                <p className="text-gray-500">Retrieving your document and analysis results.</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="h-screen flex items-center justify-center bg-gray-50 flex-col gap-4">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-            <div className="text-xl font-semibold text-gray-700">Restoring your session...</div>
-            <p className="text-gray-500">Retrieving your document and analysis results.</p>
+        <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
+            <Header
+                isPaid={isPaid}
+                hasFile={true}
+                onExport={handleExport}
+                file={file}
+            />
+
+            {/* Main Workspace: Split View */}
+            <div className="flex-1 flex overflow-hidden relative">
+
+                {/* PDF Viewer (Left/Center) */}
+                <div className="flex-1 overflow-y-auto bg-gray-200/50 p-4 sm:p-8 flex flex-col items-center gap-6 relative">
+                    {/* Sticky Info Bar */}
+                    <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border rounded-full px-6 py-2 flex items-center justify-between shadow-sm w-full max-w-2xl mb-4">
+                        <span className="font-medium text-gray-700 truncate max-w-[200px]">{file.name}</span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs text-gray-500">{pages.length} Pages</span>
+                            <button onClick={() => setShowResetConfirm(true)} className="text-xs text-red-500 font-bold hover:underline">
+                                START OVER
+                            </button>
+                        </div>
+                    </div>
+
+                    {pages.map((page, index) => (
+                        <div key={index} className="relative shadow-xl">
+                            <PageCanvas
+                                page={page}
+                                pageIndex={index}
+                                redactions={[]} // No visual redactions for now
+                                onAddRedaction={() => { }} // Disabled
+                                onRemoveRedaction={() => { }}
+                                isPaid={isPaid}
+                            />
+                        </div>
+                    ))}
+                    <div className="h-20" />
+                </div>
+
+                {/* Explanation Panel (Right Sidebar) */}
+                <div className="z-40 h-full shadow-2xl">
+                    <ExplanationPanel
+                        isPaid={isPaid}
+                        previewData={previewData}
+                        fullExplanation={fullExplanation}
+                        onUnlock={handleUnlock}
+                    />
+                </div>
+            </div>
+
+            {/* Overlays */}
+            {isProcessing && (
+                <div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+                        <h3 className="text-xl font-bold text-gray-900">Analyzing Document...</h3>
+                        <p className="text-gray-500">Extracting medical terms and identifying sections.</p>
+                    </div>
+                </div>
+            )}
+
+            {showResetConfirm && (
+                <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4">
+                        <h3 className="text-lg font-bold text-gray-900">Start Over?</h3>
+                        <p className="text-gray-600">This will clear the current analysis and return to the home screen.</p>
+                        <div className="flex gap-3 justify-end">
+                            <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Cancel</button>
+                            <button onClick={() => { setFile(null); setPages([]); setShowResetConfirm(false); }} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium">Yes, Start Over</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
-
-return (
-    <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
-        <Header
-            isPaid={isPaid}
-            hasFile={true}
-            onExport={handleExport}
-            file={file}
-        />
-
-        {/* Main Workspace: Split View */}
-        <div className="flex-1 flex overflow-hidden relative">
-
-            {/* PDF Viewer (Left/Center) */}
-            <div className="flex-1 overflow-y-auto bg-gray-200/50 p-4 sm:p-8 flex flex-col items-center gap-6 relative">
-                {/* Sticky Info Bar */}
-                <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border rounded-full px-6 py-2 flex items-center justify-between shadow-sm w-full max-w-2xl mb-4">
-                    <span className="font-medium text-gray-700 truncate max-w-[200px]">{file.name}</span>
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-500">{pages.length} Pages</span>
-                        <button onClick={() => setShowResetConfirm(true)} className="text-xs text-red-500 font-bold hover:underline">
-                            START OVER
-                        </button>
-                    </div>
-                </div>
-
-                {pages.map((page, index) => (
-                    <div key={index} className="relative shadow-xl">
-                        <PageCanvas
-                            page={page}
-                            pageIndex={index}
-                            redactions={[]} // No visual redactions for now
-                            onAddRedaction={() => { }} // Disabled
-                            onRemoveRedaction={() => { }}
-                            isPaid={isPaid}
-                        />
-                    </div>
-                ))}
-                <div className="h-20" />
-            </div>
-
-            {/* Explanation Panel (Right Sidebar) */}
-            <div className="z-40 h-full shadow-2xl">
-                <ExplanationPanel
-                    isPaid={isPaid}
-                    previewData={previewData}
-                    fullExplanation={fullExplanation}
-                    onUnlock={handleUnlock}
-                />
-            </div>
-        </div>
-
-        {/* Overlays */}
-        {isProcessing && (
-            <div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-                    <h3 className="text-xl font-bold text-gray-900">Analyzing Document...</h3>
-                    <p className="text-gray-500">Extracting medical terms and identifying sections.</p>
-                </div>
-            </div>
-        )}
-
-        {showResetConfirm && (
-            <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4">
-                    <h3 className="text-lg font-bold text-gray-900">Start Over?</h3>
-                    <p className="text-gray-600">This will clear the current analysis and return to the home screen.</p>
-                    <div className="flex gap-3 justify-end">
-                        <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Cancel</button>
-                        <button onClick={() => { setFile(null); setPages([]); setShowResetConfirm(false); }} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium">Yes, Start Over</button>
-                    </div>
-                </div>
-            </div>
-        )}
-    </div>
-);
 }
