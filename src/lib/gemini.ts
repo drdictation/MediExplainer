@@ -1,20 +1,34 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Gemini Client-Side
-// process.env.GEMINI_API_KEY is populated by vite.config.ts define
+// Initialize Gemini Client-Side (Local Dev Only)
 // @ts-ignore
-const API_KEY = (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY) || '';
-
-const genAI = new GoogleGenerativeAI(API_KEY);
+const LOCAL_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
 
 export async function analyzeText(text: string, mode: 'preview' | 'full') {
-    console.log(`[Gemini Service] Starting Analysis in ${mode} mode...`);
-    console.log(`[Gemini Service] Key present? ${!!API_KEY}`);
+    // 1. PRODUCTION / VERCEL MODE: Use Server-Side API to protect key
+    if (import.meta.env.PROD || !LOCAL_KEY) {
+        console.log(`[Gemini Service] Running in ${import.meta.env.PROD ? 'PRODUCTION' : 'NO_KEY'} mode. Delegating to /api/analyze...`);
+        try {
+            const res = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, mode })
+            });
 
-    if (!API_KEY) {
-        console.error("[Gemini Service] MISSING API KEY. Please check .env file.");
-        throw new Error("Missing Gemini API Key");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Server Analysis Failed');
+            }
+            return await res.json();
+        } catch (err) {
+            console.error("[Gemini Service] API Error:", err);
+            throw err;
+        }
     }
+
+    // 2. LOCAL DEV MODE: Client-Side Call (if key exists)
+    console.log(`[Gemini Service] Running in LOCAL mode via Browser.`);
+    const genAI = new GoogleGenerativeAI(LOCAL_KEY);
 
     try {
         const model = genAI.getGenerativeModel({
@@ -80,7 +94,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full') {
         return JSON.parse(jsonString);
 
     } catch (err: any) {
-        console.error("[Gemini Service] Error:", err);
+        console.error("[Gemini Service] Local Error:", err);
         throw err;
     }
 }
