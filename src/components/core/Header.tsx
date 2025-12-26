@@ -1,5 +1,6 @@
 import { ShieldCheck, Download } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PaywallModal } from '../modals/PaywallModal';
 
 import type { Redaction } from '../../types';
@@ -27,12 +28,14 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
             <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <ShieldCheck className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">CleanSend</h1>
-                        </div>
+                        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <ShieldCheck className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold text-gray-900 tracking-tight">CleanSend</h1>
+                            </div>
+                        </Link>
                     </div>
 
                     <div className="flex items-center gap-4">

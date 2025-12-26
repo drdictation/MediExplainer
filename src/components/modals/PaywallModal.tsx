@@ -32,7 +32,7 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                     </p>
                     <p className="text-sm text-gray-500 pt-2 flex items-center justify-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        Secure Processing: Files are processed locally in your browser and are not uploaded to our servers.
+                        Local Processing: Files are processed locally in your browser and are not uploaded to our servers.
                     </p>
                 </div>
 

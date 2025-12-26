@@ -11,7 +11,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/': {
         path: '/',
         title: 'Redact PDF Online | CleanSend',
-        metaDescription: 'Manually redact sensitive information from PDFs in your browser. Secure, client-side processing.',
+        metaDescription: 'Manually redact sensitive information from PDFs in your browser. Client-side processing.',
         h1: 'Redact Sensitive Information from PDFs',
         subhead: 'Manually black out sensitive details directly in your browser. The final PDF is flattened into visual-only data, removing the underlying text layer.',
         bullets: [

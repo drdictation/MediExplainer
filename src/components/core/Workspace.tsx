@@ -11,6 +11,7 @@ import { PageCanvas } from '../canvas/PageCanvas';
 import { Header } from './Header';
 import { Loader2 } from 'lucide-react';
 import { loadAppState, clearAppState } from '../../lib/storage';
+import { Footer } from './Footer';
 
 export function Workspace() {
     const location = useLocation();
@@ -179,7 +180,7 @@ export function Workspace() {
                         </p>
 
                         <p className="text-sm text-gray-500">
-                            You download a PDF file. Pages behave like images.
+                            Files are processed locally in your browser. No server upload.
                         </p>
                     </div>
 
@@ -195,6 +196,7 @@ export function Workspace() {
                     </div>
 
                     <div className="flex-1" /> {/* Spacer */}
+                    <Footer />
                 </div>
             </div>
         );
@@ -285,7 +287,7 @@ export function Workspace() {
                         <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
                         <div className="text-center">
                             <h3 className="text-lg font-bold text-gray-900">Flattening Document</h3>
-                            <p className="text-gray-500">Converting to secure images...</p>
+                            <p className="text-gray-500">Converting to flattened images...</p>
                         </div>
                     </div>
                 </div>
