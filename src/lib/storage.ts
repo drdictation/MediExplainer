@@ -2,6 +2,10 @@ import { set, get, del } from 'idb-keyval';
 import type { Redaction } from '../types';
 import type { FullExplanation } from './explain/types';
 
+const STORE_KEY_FILE = 'medexplain_file';
+const STORE_KEY_REDACTIONS = 'medexplain_redactions';
+const STORE_KEY_EXPLANATION = 'medexplain_explanation';
+const STORE_KEY_METADATA = 'medexplain_metadata';
 const STORE_KEY_IMAGES = 'medexplain_images'; // New Key
 
 interface SaveOptions {

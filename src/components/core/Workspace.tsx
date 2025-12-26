@@ -28,6 +28,7 @@ export function Workspace() {
     const [previewData, setPreviewData] = useState<PreviewData | null>(null);
     const [fullExplanation, setFullExplanation] = useState<FullExplanation | null>(null);
     const [rawText, setRawText] = useState<string>('');
+    const [scannedImages, setScannedImages] = useState<string[]>([]); // New State
 
     const [isPaid, setIsPaid] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
