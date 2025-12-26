@@ -58,7 +58,7 @@ export function Workspace() {
                         }
 
                         // Restore state
-                        const { file: savedFile, fullExplanation: savedExplanation } = await loadAppState() as any;
+                        const { file: savedFile, fullExplanation: savedExplanation, images: savedImages } = await loadAppState() as any;
 
                         if (savedFile) {
                             console.log('[Workspace] Saved file found, restoring...');
@@ -66,10 +66,9 @@ export function Workspace() {
                             // If we have saved explanation, strict restore
                             if (savedExplanation) {
                                 setFullExplanation(savedExplanation);
-                            } else {
-                                // If paid but no explanation yet (edge case), trigger generation
-                                // We need raw text for this, which is extracted in handleFileSelect wait...
-                                // handleFileSelect is async. We might inevitably re-extract.
+                            }
+                            if (savedImages) {
+                                setScannedImages(savedImages);
                             }
                         }
                         // Clear state after restoring
@@ -87,7 +86,7 @@ export function Workspace() {
 
     // Effect to trigger Full Generation once Paid and Text is ready
     useEffect(() => {
-        if (isPaid && rawText && !fullExplanation && !isProcessing) {
+        if (isPaid && (rawText || scannedImages.length > 0) && !fullExplanation && !isProcessing && previewData) {
             console.log('[Workspace] Paid & Ready. Generatng Full Explanation...');
             const runGen = async () => {
                 setIsProcessing(true);
@@ -95,7 +94,8 @@ export function Workspace() {
                     const expl = await generateExplanation({
                         text: rawText,
                         reportType: previewData?.reportType || 'general',
-                        useLLM: true
+                        useLLM: true,
+                        images: scannedImages // Pass images!
                     });
                     setFullExplanation(expl);
                 } catch (e) {
@@ -106,13 +106,16 @@ export function Workspace() {
             };
             runGen();
         }
-    }, [isPaid, rawText, fullExplanation, isProcessing, previewData]);
+    }, [isPaid, rawText, fullExplanation, isProcessing, previewData, scannedImages]);
 
 
     const handleFileSelect = async (selectedFile: File) => {
         setIsProcessing(true);
         try {
             setFile(selectedFile);
+            setFullExplanation(null); // Clear old explanation
+            setScannedImages([]); // Clear old images
+
             const doc = await loadPDF(selectedFile);
 
             const loadedPages: pdfjsLib.PDFPageProxy[] = [];
@@ -122,8 +125,11 @@ export function Workspace() {
             setPages(loadedPages);
 
             // 1. Extract Text & Images
-            const { fullText } = await extractTextFromPDF(doc);
+            const { fullText, images } = await extractTextFromPDF(doc);
             setRawText(fullText);
+            if (images && images.length > 0) {
+                setScannedImages(images); // Store images
+            }
 
             // 2. Generate Preview
             // Pass the DOC object so preview can re-extract/verify if needed, 
@@ -136,7 +142,7 @@ export function Workspace() {
             if (!isPaid) {
                 // We can't save 'fullText' easily in IDB if it's huge, but file is saved.
                 // We'll re-extract on reload.
-                await saveAppState({ file: selectedFile, redactions: [] }); // Legacy key
+                await saveAppState({ file: selectedFile, redactions: [], images: images }); // Legacy key, also save images
             }
 
         } catch (err) {

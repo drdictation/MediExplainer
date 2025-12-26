@@ -1,11 +1,13 @@
 import type { FullExplanation } from './types';
 import { generateLocalExplanation } from './fallback';
 import { sanitizeExplanation } from './safety';
+import { analyzeText } from '../gemini';
 
 export interface GenerateOptions {
     text: string;
     reportType: string;
     useLLM: boolean;
+    images?: string[];
 }
 
 // System Prompt for Backend Reference (to be used in api/explain.TS)
@@ -19,8 +21,7 @@ STRICT RULES:
 5. Tone: Neutral, educational, calm.
 `;
 
-import { analyzeText } from '../gemini';
-
+// (Checking types)
 export async function generateExplanation(options: GenerateOptions): Promise<FullExplanation> {
     if (!options.useLLM) {
         console.log('Generating local explanation (Explicit Local Mode)...');
@@ -29,7 +30,8 @@ export async function generateExplanation(options: GenerateOptions): Promise<Ful
 
     try {
         console.log("Requesting Gemini Full Explanation (Client-Side)...");
-        const data = await analyzeText(options.text, 'full');
+        // Pass images if available
+        const data = await analyzeText(options.text, 'full', options.images);
         return sanitizeExplanation(data);
 
     } catch (err) {

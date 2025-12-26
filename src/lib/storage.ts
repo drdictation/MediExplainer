@@ -2,23 +2,22 @@ import { set, get, del } from 'idb-keyval';
 import type { Redaction } from '../types';
 import type { FullExplanation } from './explain/types';
 
-const STORE_KEY_FILE = 'medexplain_file';
-const STORE_KEY_REDACTIONS = 'medexplain_redactions';
-const STORE_KEY_EXPLANATION = 'medexplain_explanation';
-const STORE_KEY_METADATA = 'medexplain_metadata';
+const STORE_KEY_IMAGES = 'medexplain_images'; // New Key
 
 interface SaveOptions {
     file?: File | null;
     redactions?: Redaction[];
     fullExplanation?: FullExplanation | null;
     metadata?: any;
+    images?: string[]; // New
 }
 
 export async function saveAppState(options: SaveOptions) {
     console.log('[Storage] Saving app state...', {
         hasFile: !!options.file,
         redactionCount: options.redactions?.length,
-        hasExplanation: !!options.fullExplanation
+        hasExplanation: !!options.fullExplanation,
+        hasImages: !!options.images
     });
 
     try {
@@ -43,6 +42,10 @@ export async function saveAppState(options: SaveOptions) {
             await set(STORE_KEY_METADATA, options.metadata);
         }
 
+        if (options.images) {
+            await set(STORE_KEY_IMAGES, options.images);
+        }
+
         console.log('[Storage] App state saved successfully');
     } catch (err) {
         console.error('Failed to save app state:', err);
@@ -56,6 +59,7 @@ export async function loadAppState(): Promise<SaveOptions> {
         const redactions = await get<Redaction[]>(STORE_KEY_REDACTIONS);
         const fullExplanation = await get<FullExplanation>(STORE_KEY_EXPLANATION);
         const metadata = await get<any>(STORE_KEY_METADATA);
+        const images = await get<string[]>(STORE_KEY_IMAGES);
 
         let file: File | undefined = undefined;
         if (savedData) {
@@ -63,7 +67,7 @@ export async function loadAppState(): Promise<SaveOptions> {
             console.log('[Storage] App state loaded & File reconstructed:', { fileName: file.name });
         }
 
-        return { file, redactions, fullExplanation, metadata };
+        return { file, redactions, fullExplanation, metadata, images };
     } catch (err) {
         console.error('Failed to load app state:', err);
         return {};
@@ -77,6 +81,7 @@ export async function clearAppState() {
         await del(STORE_KEY_REDACTIONS);
         await del(STORE_KEY_EXPLANATION);
         await del(STORE_KEY_METADATA);
+        await del(STORE_KEY_IMAGES);
     } catch (err) {
         console.error('Failed to clear app state:', err);
     }
