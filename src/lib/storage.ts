@@ -44,9 +44,10 @@ export async function saveAppState(options: SaveOptions) {
         if (options.redactions) await set(STORE_KEY_REDACTIONS, options.redactions);
         if (options.fullExplanation) await set(STORE_KEY_EXPLANATION, options.fullExplanation);
         if (options.metadata) await set(STORE_KEY_METADATA, options.metadata);
-        if (options.images) await set(STORE_KEY_IMAGES, options.images);
-        if (options.rawText) await set(STORE_KEY_TEXT, options.rawText); // Save Text
-        if (options.previewData) await set(STORE_KEY_PREVIEW, options.previewData); // Save Preview
+        // Use !== undefined to save even if empty string or empty array
+        if (options.images !== undefined) await set(STORE_KEY_IMAGES, options.images);
+        if (options.rawText !== undefined) await set(STORE_KEY_TEXT, options.rawText);
+        if (options.previewData !== undefined) await set(STORE_KEY_PREVIEW, options.previewData);
 
         console.log('[Storage] App state saved successfully');
     } catch (err) {

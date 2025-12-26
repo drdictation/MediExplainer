@@ -81,16 +81,22 @@ export function Workspace() {
                             setPages(loadedPages);
 
                             // 2. Restore or Regenerate Data
-                            // If we have saved data, use it. If not, REGENERATE IT NOW so we don't show "Analyzing..." later.
+                            // For scanned docs: images matter, not text
+                            // For text PDFs: text matters
+                            // Only re-extract if we have NEITHER
 
-                            if (!savedText) {
-                                console.log('[Workspace] Missing saved text. Re-extracting...');
+                            const hasText = savedText !== undefined && savedText !== null;
+                            const hasImages = savedImages && savedImages.length > 0;
+
+                            if (!hasText && !hasImages) {
+                                console.log('[Workspace] Missing saved text AND images. Re-extracting...');
                                 const { fullText, images } = await extractTextFromPDF(doc);
                                 savedText = fullText;
-                                if (!savedImages) savedImages = images; // Recover images too if missing
+                                savedImages = images;
                             }
-                            setRawText(savedText);
 
+                            // Set states
+                            setRawText(savedText || '');
                             if (savedImages && savedImages.length > 0) {
                                 setScannedImages(savedImages);
                             }
