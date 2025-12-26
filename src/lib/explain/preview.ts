@@ -1,10 +1,8 @@
 import type { PreviewData } from './types';
-import { detectReportType } from './reportType'; // Fallback
-import { segmentText } from './segment'; // Fallback
 import { extractTextFromPDF } from './extractText';
 import { analyzeText } from '../gemini';
 
-export async function generatePreview(file: File, pdf: any): Promise<PreviewData> {
+export async function generatePreview(pdf: any): Promise<PreviewData> {
     // 1. Extract Text & Images (if scanned)
     const { fullText, images } = await extractTextFromPDF(pdf);
 

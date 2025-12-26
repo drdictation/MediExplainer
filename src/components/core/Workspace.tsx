@@ -122,14 +122,14 @@ export function Workspace() {
             setPages(loadedPages);
 
             // 1. Extract Text & Images
-            const { fullText, images } = await extractTextFromPDF(doc);
+            const { fullText } = await extractTextFromPDF(doc);
             setRawText(fullText);
 
             // 2. Generate Preview
             // Pass the DOC object so preview can re-extract/verify if needed, 
             // OR just pass the extracted images if we refactor preview signature.
             // Current signature of preview is `generatePreview(file, pdf)`
-            const preview = await generatePreview(selectedFile, doc);
+            const preview = await generatePreview(doc);
             setPreviewData(preview);
 
             // Save state for potential reload after payment
