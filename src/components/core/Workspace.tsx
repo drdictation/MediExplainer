@@ -25,6 +25,7 @@ export function Workspace() {
 
     // Core Logic State
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isRestoring, setIsRestoring] = useState(false); // New: explicit restoration state
     const [previewData, setPreviewData] = useState<PreviewData | null>(null);
     const [fullExplanation, setFullExplanation] = useState<FullExplanation | null>(null);
     const [rawText, setRawText] = useState<string>('');
@@ -40,6 +41,7 @@ export function Workspace() {
 
             if (sessionId) {
                 console.log('[Workspace] Session ID detected, verifying...', sessionId);
+                setIsRestoring(true); // Start restoration UI
                 try {
                     const res = await fetch(`/api/verify-payment?session_id=${sessionId}`);
                     const data = await res.json();
@@ -94,6 +96,8 @@ export function Workspace() {
                     }
                 } catch (err) {
                     console.error('[Workspace] Error verifying payment:', err);
+                } finally {
+                    setIsRestoring(false); // Done restoring
                 }
             }
         };
@@ -221,7 +225,7 @@ export function Workspace() {
 
     // --- RENDER ---
 
-    if (!file) {
+    if (!file && !isRestoring) {
         return (
             <div className="min-h-screen flex flex-col bg-gray-50">
                 <Header isPaid={isPaid} hasFile={false} />
