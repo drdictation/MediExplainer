@@ -1,12 +1,16 @@
 import { X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { saveAppState } from '../../lib/storage';
+import type { Redaction } from '../../types';
 
 interface PaywallModalProps {
     isOpen: boolean;
     onClose: () => void;
+    file: File | null;
+    redactions: Redaction[];
 }
 
-export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
+export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     if (!isOpen) return null;
@@ -36,6 +40,10 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     onClick={async () => {
                         setIsLoading(true);
                         try {
+                            if (file) {
+                                await saveAppState(file, redactions);
+                            }
+
                             const response = await fetch('/api/create-checkout-session', {
                                 method: 'POST',
                             });

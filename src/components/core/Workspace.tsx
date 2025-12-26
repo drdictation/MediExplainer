@@ -141,7 +141,13 @@ export function Workspace() {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100/50 relative">
-            <Header isPaid={isPaid} hasFile={true} onExport={handleExport} />
+            <Header
+                isPaid={isPaid}
+                hasFile={true}
+                onExport={handleExport}
+                file={file}
+                redactions={redactions}
+            />
 
             <div className="sticky top-16 z-40 bg-white/90 backdrop-blur border-b px-4 py-2 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4 text-sm text-gray-600">

@@ -2,13 +2,17 @@ import { ShieldCheck, Download } from 'lucide-react';
 import { useState } from 'react';
 import { PaywallModal } from '../modals/PaywallModal';
 
+import type { Redaction } from '../../types';
+
 interface HeaderProps {
     onExport?: () => void;
     isPaid?: boolean;
     hasFile?: boolean;
+    file?: File | null;
+    redactions?: Redaction[];
 }
 
-export function Header({ onExport, isPaid, hasFile }: HeaderProps) {
+export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderProps) {
     const [showPaywall, setShowPaywall] = useState(false);
 
     // Status text logic
@@ -73,6 +77,8 @@ export function Header({ onExport, isPaid, hasFile }: HeaderProps) {
             <PaywallModal
                 isOpen={showPaywall}
                 onClose={() => setShowPaywall(false)}
+                file={file || null}
+                redactions={redactions || []}
             />
         </>
     );
