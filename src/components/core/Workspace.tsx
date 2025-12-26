@@ -59,19 +59,35 @@ export function Workspace() {
                         }
 
                         // Restore state
-                        const { file: savedFile, fullExplanation: savedExplanation, images: savedImages } = await loadAppState() as any;
+                        const restored = await loadAppState() as any;
+                        const savedFile = restored.file;
+                        const savedExplanation = restored.fullExplanation;
+                        const savedImages = restored.images;
+                        const savedText = restored.rawText;
+                        const savedPreview = restored.previewData;
 
                         if (savedFile) {
-                            console.log('[Workspace] Saved file found, restoring...');
-                            await handleFileSelect(savedFile);
-                            // If we have saved explanation, strict restore
-                            if (savedExplanation) {
-                                setFullExplanation(savedExplanation);
+                            console.log('[Workspace] Saved file found, restoring state WITHOUT re-analysis...');
+                            setFile(savedFile);
+
+                            // Restore UI Pages ONLY (Fast)
+                            const doc = await loadPDF(savedFile);
+                            const loadedPages: pdfjsLib.PDFPageProxy[] = [];
+                            for (let i = 1; i <= doc.numPages; i++) {
+                                loadedPages.push(await doc.getPage(i));
                             }
-                            if (savedImages) {
-                                setScannedImages(savedImages);
-                            }
+                            setPages(loadedPages);
+
+                            // Restore Analysis Data directly
+                            if (savedText) setRawText(savedText);
+                            if (savedImages) setScannedImages(savedImages);
+                            if (savedPreview) setPreviewData(savedPreview);
+                            if (savedExplanation) setFullExplanation(savedExplanation);
+
+                            // If we lacked text/preview for some reason, THEN trigger analysis? 
+                            // Unlikely if they got to payment.
                         }
+
                         // Clear state after restoring
                         await clearAppState();
                         window.history.replaceState({}, '', window.location.pathname);
@@ -140,11 +156,15 @@ export function Workspace() {
             setPreviewData(preview);
 
             // Save state for potential reload after payment
-            if (!isPaid) {
-                // We can't save 'fullText' easily in IDB if it's huge, but file is saved.
-                // We'll re-extract on reload.
-                await saveAppState({ file: selectedFile, redactions: [], images: images }); // Legacy key, also save images
-            }
+            saveAppState({
+                file: selectedFile,
+                rawText: fullText,
+                previewData: preview,
+                images: images,
+                metadata: {
+                    lastUpload: Date.now()
+                }
+            });
 
         } catch (err) {
             console.error(err);

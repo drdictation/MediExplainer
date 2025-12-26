@@ -1,6 +1,6 @@
 import { set, get, del } from 'idb-keyval';
 import type { Redaction } from '../types';
-import type { FullExplanation } from './explain/types';
+import type { FullExplanation, PreviewData } from './explain/types';
 
 const STORE_KEY_FILE = 'medexplain_file';
 const STORE_KEY_REDACTIONS = 'medexplain_redactions';
@@ -8,12 +8,17 @@ const STORE_KEY_EXPLANATION = 'medexplain_explanation';
 const STORE_KEY_METADATA = 'medexplain_metadata';
 const STORE_KEY_IMAGES = 'medexplain_images'; // New Key
 
+const STORE_KEY_TEXT = 'medexplain_text'; // New
+const STORE_KEY_PREVIEW = 'medexplain_preview'; // New
+
 interface SaveOptions {
     file?: File | null;
     redactions?: Redaction[];
     fullExplanation?: FullExplanation | null;
     metadata?: any;
-    images?: string[]; // New
+    images?: string[];
+    rawText?: string; // New
+    previewData?: PreviewData | null; // New
 }
 
 export async function saveAppState(options: SaveOptions) {
@@ -21,7 +26,9 @@ export async function saveAppState(options: SaveOptions) {
         hasFile: !!options.file,
         redactionCount: options.redactions?.length,
         hasExplanation: !!options.fullExplanation,
-        hasImages: !!options.images
+        hasImages: !!options.images,
+        hasText: !!options.rawText,
+        hasPreview: !!options.previewData
     });
 
     try {
@@ -34,21 +41,12 @@ export async function saveAppState(options: SaveOptions) {
             });
         }
 
-        if (options.redactions) {
-            await set(STORE_KEY_REDACTIONS, options.redactions);
-        }
-
-        if (options.fullExplanation) {
-            await set(STORE_KEY_EXPLANATION, options.fullExplanation);
-        }
-
-        if (options.metadata) {
-            await set(STORE_KEY_METADATA, options.metadata);
-        }
-
-        if (options.images) {
-            await set(STORE_KEY_IMAGES, options.images);
-        }
+        if (options.redactions) await set(STORE_KEY_REDACTIONS, options.redactions);
+        if (options.fullExplanation) await set(STORE_KEY_EXPLANATION, options.fullExplanation);
+        if (options.metadata) await set(STORE_KEY_METADATA, options.metadata);
+        if (options.images) await set(STORE_KEY_IMAGES, options.images);
+        if (options.rawText) await set(STORE_KEY_TEXT, options.rawText); // Save Text
+        if (options.previewData) await set(STORE_KEY_PREVIEW, options.previewData); // Save Preview
 
         console.log('[Storage] App state saved successfully');
     } catch (err) {
@@ -64,6 +62,8 @@ export async function loadAppState(): Promise<SaveOptions> {
         const fullExplanation = await get<FullExplanation>(STORE_KEY_EXPLANATION);
         const metadata = await get<any>(STORE_KEY_METADATA);
         const images = await get<string[]>(STORE_KEY_IMAGES);
+        const rawText = await get<string>(STORE_KEY_TEXT);
+        const previewData = await get<PreviewData>(STORE_KEY_PREVIEW);
 
         let file: File | undefined = undefined;
         if (savedData) {
@@ -71,7 +71,7 @@ export async function loadAppState(): Promise<SaveOptions> {
             console.log('[Storage] App state loaded & File reconstructed:', { fileName: file.name });
         }
 
-        return { file, redactions, fullExplanation, metadata, images };
+        return { file, redactions, fullExplanation, metadata, images, rawText, previewData };
     } catch (err) {
         console.error('Failed to load app state:', err);
         return {};
@@ -86,6 +86,8 @@ export async function clearAppState() {
         await del(STORE_KEY_EXPLANATION);
         await del(STORE_KEY_METADATA);
         await del(STORE_KEY_IMAGES);
+        await del(STORE_KEY_TEXT);
+        await del(STORE_KEY_PREVIEW);
     } catch (err) {
         console.error('Failed to clear app state:', err);
     }
