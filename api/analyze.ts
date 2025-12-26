@@ -20,14 +20,38 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ error: 'Server configuration error' });
     }
 
-    try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash-lite",
-            generationConfig: {
-                responseMimeType: "application/json",
-            }
-        });
+    // Helper to try generation with fallback models
+    async function generateWithFallback(systemInstruction: string, prompt: string) {
+        const modelsToTry = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite-preview-02-05", "gemini-1.5-flash"];
 
+        let lastError;
+        for (const modelName of modelsToTry) {
+            try {
+                console.log(`[API] Attempting analysis with model: ${modelName}`);
+                const model = genAI.getGenerativeModel({
+                    model: modelName,
+                    generationConfig: { responseMimeType: "application/json" }
+                });
+
+                const result = await model.generateContent({
+                    contents: [{ role: "user", parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
+                });
+
+                return result.response.text();
+            } catch (err: any) {
+                console.warn(`[API] Model ${modelName} failed:`, err.message);
+                lastError = err;
+                // If it's an auth error, don't retry, just fail.
+                if (err.message && (err.message.includes("API_KEY") || err.message.includes("403"))) {
+                    throw err;
+                }
+                // Otherwise continue to next model
+            }
+        }
+        throw lastError || new Error("All models failed");
+    }
+
+    try {
         // Prompt Engineering based on Mode
         let systemInstruction = "";
         let prompt = "";
@@ -73,17 +97,11 @@ export default async function handler(req: any, res: any) {
                 RULES:
                 1. No medical advice/diagnosis. "The report states X", not "You have X".
                 2. Explain terms simply.
-                3. Be reassuring but neutral.
             `;
             prompt = `Explain this full medical report: \n\n${text}`;
         }
 
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
-        });
-
-        const response = result.response;
-        const jsonString = response.text();
+        const jsonString = await generateWithFallback(systemInstruction, prompt);
         const data = JSON.parse(jsonString);
 
         return res.status(200).json(data);
