@@ -28,10 +28,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         h1: 'Redact Bank Statements from PDFs',
         subhead: 'Black out account numbers and personal details directly in your browser. The final PDF is flattened into visual-only data, removing the underlying text layer.',
         bullets: [
-            { text: 'Manual redaction you control (draw black boxes).' },
-            { text: 'Local processing in your browser after the page loads.' },
-            { text: 'Flattened output removes underlying text layer.' },
-            { text: 'Useful before sharing statements with third parties.' },
+            { title: 'Manual Precision', text: 'Manual redaction you control (draw black boxes).' },
+            { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
+            { title: 'Flattened Output', text: 'Flattened output removes underlying text layer.' },
+            { title: 'Ready for Sharing', text: 'Useful before sharing statements with third parties.' },
         ],
     },
     '/redact-id': {
@@ -41,10 +41,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         h1: 'Redact ID Documents from PDFs',
         subhead: 'Manually black out sensitive fields before sharing. The final PDF is flattened into visual-only data, removing the underlying text layer.',
         bullets: [
-            { text: 'Manual precision (you choose what is redacted).' },
-            { text: 'Local processing in your browser after the page loads.' },
-            { text: 'Flattened output removes underlying text layer.' },
-            { text: 'Useful for IDs and personal documents.' },
+            { title: 'Precise Control', text: 'Manual precision (you choose what is redacted).' },
+            { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
+            { title: 'Flattened Output', text: 'Flattened output removes underlying text layer.' },
+            { title: 'Identity Protection', text: 'Useful for IDs and personal documents.' },
         ],
     },
     '/redact-visa': {
@@ -54,10 +54,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         h1: 'Redact Visa Documents from PDFs',
         subhead: 'Black out sensitive fields manually before sharing. The final PDF is flattened into visual-only data, removing the underlying text layer.',
         bullets: [
-            { text: 'Manual redaction (draw black boxes).' },
-            { text: 'Local processing in your browser after the page loads.' },
-            { text: 'Flattened output removes underlying text layer.' },
-            { text: 'Useful for travel and identity documents.' },
+            { title: 'Manual Redaction', text: 'Manual redaction (draw black boxes).' },
+            { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
+            { title: 'Flattened Output', text: 'Flattened output removes underlying text layer.' },
+            { title: 'Travel Ready', text: 'Useful for travel and identity documents.' },
         ],
     },
     '/redact-rental-application': {
@@ -67,10 +67,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         h1: 'Redact Documents for Rental Applications',
         subhead: 'Manually black out sensitive fields before submission. The final PDF is flattened into visual-only data, removing the underlying text layer.',
         bullets: [
-            { text: 'Manual redaction you control.' },
-            { text: 'Local processing in your browser after the page loads.' },
-            { text: 'Flattened output removes underlying text layer.' },
-            { text: 'Useful for statements, IDs, and application documents.' },
+            { title: 'In Your Control', text: 'Manual redaction you control.' },
+            { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
+            { title: 'Flattened Output', text: 'Flattened output removes underlying text layer.' },
+            { title: 'Application Ready', text: 'Useful for statements, IDs, and application documents.' },
         ],
     },
 };
