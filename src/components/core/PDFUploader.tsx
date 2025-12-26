@@ -90,6 +90,12 @@ export function PDFUploader({ onFileSelect, isProcessing = false }: PDFUploaderP
                 />
 
                 <div className="flex flex-col items-center gap-4">
+                    {/* Trust Badge */}
+                    <div className="bg-green-50 px-3 py-1 rounded-full border border-green-100 flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs font-medium text-green-700">Client-side only • No server upload</span>
+                    </div>
+
                     <div className={cn(
                         "p-4 rounded-full transition-colors",
                         error ? "bg-red-100 text-red-600" : "bg-blue-50 text-blue-600"
@@ -105,10 +111,10 @@ export function PDFUploader({ onFileSelect, isProcessing = false }: PDFUploaderP
 
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">
-                            {isProcessing ? 'Processing PDF...' : 'Upload your PDF'}
+                            {isProcessing ? 'Processing PDF...' : 'Select PDF to Redact'}
                         </h3>
                         <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                            {error || "Drag and drop or click to browse. Files are processed locally in your browser."}
+                            {error || "Drag and drop or click to browse. Files never leave your device."}
                         </p>
                     </div>
 

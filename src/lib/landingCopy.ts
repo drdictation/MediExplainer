@@ -11,9 +11,9 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/': {
         path: '/',
         title: 'Redact PDF Online | CleanSend',
-        metaDescription: 'Manually redact sensitive information from PDFs in your browser. Client-side processing.',
-        h1: 'Redact Sensitive Information from PDFs',
-        subhead: 'Manually black out sensitive details directly in your browser. The final PDF is flattened into visual-only data, removing the underlying text layer.',
+        metaDescription: 'Black out sensitive information from PDFs directly in your browser. No server upload—files never leave your device.',
+        h1: 'Black Out Sensitive Data in PDFs',
+        subhead: 'Redact text permanently before sharing. Your files are processed 100% locally in your browser and are never uploaded to a server.',
         bullets: [
             { title: 'Flattened Output', text: 'Pages are converted to unselectable images to obscure hidden text data.' },
             { title: 'Manual Precision', text: 'You decide exactly what is redacted by drawing black boxes yourself.' },
@@ -24,9 +24,9 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/redact-bank-statement': {
         path: '/redact-bank-statement',
         title: 'Redact Bank Statements from PDFs | CleanSend',
-        metaDescription: 'Redact bank statements in your browser. Manually black out sensitive fields and export a PDF where pages behave like images (no selectable text).',
-        h1: 'Redact Bank Statements from PDFs',
-        subhead: 'Black out account numbers and personal details directly in your browser. The final PDF is flattened into visual-only data, removing the underlying text layer.',
+        metaDescription: 'Black out account numbers and transaction details in your bank statement. No server upload—files stay on your device.',
+        h1: 'Black Out Sensitive Data on Bank Statements',
+        subhead: 'Hide account numbers and balances before sharing. Your bank statement is processed locally in your browser and never sent to a server.',
         bullets: [
             { title: 'Manual Precision', text: 'Manual redaction you control (draw black boxes).' },
             { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
@@ -37,9 +37,9 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/redact-id': {
         path: '/redact-id',
         title: 'Redact ID Documents from PDFs | CleanSend',
-        metaDescription: 'Redact ID documents in your browser. Manually black out sensitive details and export a flattened PDF with no selectable text.',
-        h1: 'Redact ID Documents from PDFs',
-        subhead: 'Manually black out sensitive fields before sharing. The final PDF is flattened into visual-only data, removing the underlying text layer.',
+        metaDescription: 'Black out sensitive details on ID documents. No server upload—redact passports and licenses securely in your browser.',
+        h1: 'Black Out Details on ID Documents',
+        subhead: 'Hide personal numbers and addresses before sharing. Your ID document stays on your device and is never uploaded to the cloud.',
         bullets: [
             { title: 'Precise Control', text: 'Manual precision (you choose what is redacted).' },
             { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
@@ -50,9 +50,9 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/redact-visa': {
         path: '/redact-visa',
         title: 'Redact Visa Documents from PDFs | CleanSend',
-        metaDescription: 'Redact visa documents in your browser. Manually black out sensitive fields and export a flattened PDF with no selectable text.',
-        h1: 'Redact Visa Documents from PDFs',
-        subhead: 'Black out sensitive fields manually before sharing. The final PDF is flattened into visual-only data, removing the underlying text layer.',
+        metaDescription: 'Redact sensitive info from visa documents. No server upload—files are processed locally in your browser.',
+        h1: 'Black Out Sensitive Info on Visas',
+        subhead: 'Hide personal details manually before sharing. Your visa documents are processed locally on your device, ensuring privacy.',
         bullets: [
             { title: 'Manual Redaction', text: 'Manual redaction (draw black boxes).' },
             { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
@@ -63,9 +63,9 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/redact-rental-application': {
         path: '/redact-rental-application',
         title: 'Redact Documents for Rental Applications | CleanSend',
-        metaDescription: 'Prepare documents for rental applications. Manually redact sensitive details and export a flattened PDF with no selectable text.',
-        h1: 'Redact Documents for Rental Applications',
-        subhead: 'Manually black out sensitive fields before submission. The final PDF is flattened into visual-only data, removing the underlying text layer.',
+        metaDescription: 'Prepare rental application documents by blacking out sensitive data. No server upload—files never leave your computer.',
+        h1: 'Black Out Data for Rental Applications',
+        subhead: 'Hide SSNs and account details before submitting. Your documents are processed 100% locally in your browser.',
         bullets: [
             { title: 'In Your Control', text: 'Manual redaction you control.' },
             { title: 'Local Processing', text: 'Local processing in your browser after the page loads.' },
