@@ -48,3 +48,23 @@ export async function extractTextFromPage(page: pdfjsLib.PDFPageProxy): Promise<
     const textContent = await page.getTextContent();
     return textContent.items.map((item: any) => item.str).join(' ');
 }
+
+export async function renderPageToImage(page: pdfjsLib.PDFPageProxy, scale = 1.5): Promise<string> {
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas context not found');
+
+    const renderContext = {
+        canvasContext: context,
+        viewport,
+    };
+    await page.render(renderContext as any).promise;
+
+    // Convert to Base64 (remove 'data:image/jpeg;base64,' prefix for Gemini)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    return dataUrl.split(',')[1];
+}

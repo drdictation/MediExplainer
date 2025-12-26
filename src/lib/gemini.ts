@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // @ts-ignore
 const LOCAL_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
 
-export async function analyzeText(text: string, mode: 'preview' | 'full') {
+export async function analyzeText(text: string, mode: 'preview' | 'full', images?: string[]) {
     // 1. PRODUCTION / VERCEL MODE: Use Server-Side API to protect key
     if (import.meta.env.PROD || !LOCAL_KEY) {
         console.log(`[Gemini Service] Running in ${import.meta.env.PROD ? 'PRODUCTION' : 'NO_KEY'} mode. Delegating to /api/analyze...`);
@@ -12,7 +12,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full') {
             const res = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, mode })
+                body: JSON.stringify({ text, mode, images })
             });
 
             if (!res.ok) {
@@ -43,8 +43,9 @@ export async function analyzeText(text: string, mode: 'preview' | 'full') {
 
         if (mode === 'preview') {
             systemInstruction = `
-                You are a medical document analyzer. 
+                You are a medical document analyzer.
                 Goal: Identify the report type, finding header sections, and list ALL medical terms found.
+                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
                 Strict JSON Output format:
                 {
                     "reportType": "lab" | "imaging" | "discharge" | "general",
@@ -57,10 +58,11 @@ export async function analyzeText(text: string, mode: 'preview' | 'full') {
                 }
                 Select ONE term as "previewTerm" to give a definition for.
             `;
-            prompt = `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
+            prompt = images?.length ? "Analyze these scanned document images:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
         } else {
             systemInstruction = `
                 You are a medical literacy assistant. Explain this report to a patient in plain English.
+                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
                 Output JSON:
                 {
                     "reportType": "string",
@@ -80,12 +82,18 @@ export async function analyzeText(text: string, mode: 'preview' | 'full') {
                 1. No medical advice/diagnosis.
                 2. Explain terms simply.
             `;
-            prompt = `Explain this full medical report: \n\n${text}`;
+            prompt = images?.length ? "Explain this full medical report (from images):" : `Explain this full medical report: \n\n${text}`;
+        }
+
+        const parts: any[] = [{ text: systemInstruction + "\n\n" + prompt }];
+        if (images && images.length > 0) {
+            console.log(`[Gemini Service] Attaching ${images.length} images...`);
+            parts.push(...images.map(b64 => ({ inlineData: { data: b64, mimeType: "image/jpeg" } })));
         }
 
         console.log("[Gemini Service] Sending request to Google...");
         const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
+            contents: [{ role: "user", parts }]
         });
 
         const response = result.response;

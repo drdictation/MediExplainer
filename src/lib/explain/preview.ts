@@ -1,14 +1,27 @@
 import type { PreviewData } from './types';
 import { detectReportType } from './reportType'; // Fallback
 import { segmentText } from './segment'; // Fallback
-import { findTerms } from './terms'; // Fallback
-
+import { extractTextFromPDF } from './extractText';
 import { analyzeText } from '../gemini';
 
-export async function generatePreview(text: string): Promise<PreviewData> {
+export async function generatePreview(file: File, pdf: any): Promise<PreviewData> {
+    // 1. Extract Text & Images (if scanned)
+    const { fullText, images } = await extractTextFromPDF(pdf);
+
+    // 2. Fallback for empty docs
+    if (!fullText && (!images || images.length === 0)) {
+        return {
+            reportType: 'general',
+            detectedSections: [],
+            detectedTermsCount: 0,
+            previewTerm: null,
+            isLocked: true
+        };
+    }
+
     try {
         console.log("Requesting Gemini Preview Analysis (Client-Side)...");
-        const data = await analyzeText(text, 'preview');
+        const data = await analyzeText(fullText, 'preview', images);
 
         return {
             reportType: data.reportType,
@@ -18,20 +31,16 @@ export async function generatePreview(text: string): Promise<PreviewData> {
             isLocked: true
         };
 
-    } catch (err) {
-        console.warn("Gemini Preview failed, falling back to local heuristics.", err);
-
-        // Fallback Logic
-        const reportTypeResult = detectReportType(text);
-        const sections = segmentText(text);
-        const terms = findTerms(text);
-
+    } catch (e: any) {
+        console.error("Gemini Preview failed (Vision support).", e);
+        // Fallback to segments if strictly needed, but scanned docs have no text...
         return {
-            reportType: reportTypeResult.type,
-            detectedSections: sections.map(s => s.title),
-            detectedTermsCount: terms.length,
-            previewTerm: terms[0] || null,
+            reportType: 'general',
+            detectedSections: [],
+            detectedTermsCount: 0,
+            previewTerm: null,
             isLocked: true
         };
     }
 }
+

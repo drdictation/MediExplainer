@@ -9,10 +9,10 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { text, mode } = req.body;
+    const { text, mode, images } = req.body;
 
-    if (!text) {
-        return res.status(400).json({ error: 'No text provided' });
+    if (!text && (!images || images.length === 0)) {
+        return res.status(400).json({ error: 'No text or images provided' });
     }
 
     if (!process.env.GEMINI_API_KEY) {
@@ -21,7 +21,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Helper to try generation with fallback models
-    async function generateWithFallback(systemInstruction: string, prompt: string) {
+    async function generateWithFallback(systemInstruction: string, prompt: string, imageParts?: any[]) {
         const modelsToTry = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite-preview-02-05", "gemini-1.5-flash"];
 
         let lastError;
@@ -33,34 +33,49 @@ export default async function handler(req: any, res: any) {
                     generationConfig: { responseMimeType: "application/json" }
                 });
 
+                const parts: any[] = [{ text: systemInstruction + "\n\n" + prompt }];
+                if (imageParts && imageParts.length > 0) {
+                    console.log(`[API] Attaching ${imageParts.length} images to request...`);
+                    parts.push(...imageParts);
+                }
+
                 const result = await model.generateContent({
-                    contents: [{ role: "user", parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
+                    contents: [{ role: "user", parts }]
                 });
 
                 return result.response.text();
             } catch (err: any) {
                 console.warn(`[API] Model ${modelName} failed:`, err.message);
                 lastError = err;
-                // If it's an auth error, don't retry, just fail.
                 if (err.message && (err.message.includes("API_KEY") || err.message.includes("403"))) {
                     throw err;
                 }
-                // Otherwise continue to next model
             }
         }
         throw lastError || new Error("All models failed");
     }
 
     try {
+        // Prepare Images if any
+        let imageParts: any[] = [];
+        if (images && Array.isArray(images)) {
+            imageParts = images.map(b64 => ({
+                inlineData: {
+                    data: b64,
+                    mimeType: "image/jpeg"
+                }
+            }));
+        }
+
         // Prompt Engineering based on Mode
         let systemInstruction = "";
         let prompt = "";
 
         if (mode === 'preview') {
-            // Preview Mode: Fast, minimal token usage. Just finding structure.
             systemInstruction = `
                 You are a medical document analyzer. 
                 Goal: Identify the report type, finding header sections, and list ALL medical terms found.
+                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
                 Strict JSON Output format:
                 {
                     "reportType": "lab" | "imaging" | "discharge" | "general",
@@ -72,13 +87,12 @@ export default async function handler(req: any, res: any) {
                      "previewTerm": { "term": "Term1", "definition": "Simple 1 sentence definition", "category": "..." }
                 }
                 Select ONE term as "previewTerm" to give a definition for.
-                Do NOT define the other detectedTerms, just list them.
             `;
-            prompt = `Analyze this text structure: \n\n${text.substring(0, 15000)}`; // Limit input for speed/cost if needed
+            prompt = images?.length ? "Analyze these scanned document images:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
         } else {
-            // Full Mode: Deep explanation
             systemInstruction = `
                 You are a medical literacy assistant. Explain this report to a patient in plain English.
+                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
                 Output JSON:
                 {
                     "reportType": "string",
@@ -98,10 +112,10 @@ export default async function handler(req: any, res: any) {
                 1. No medical advice/diagnosis. "The report states X", not "You have X".
                 2. Explain terms simply.
             `;
-            prompt = `Explain this full medical report: \n\n${text}`;
+            prompt = images?.length ? "Explain this full medical report (from images):" : `Explain this full medical report: \n\n${text}`;
         }
 
-        const jsonString = await generateWithFallback(systemInstruction, prompt);
+        const jsonString = await generateWithFallback(systemInstruction, prompt, imageParts);
         const data = JSON.parse(jsonString);
 
         return res.status(200).json(data);
