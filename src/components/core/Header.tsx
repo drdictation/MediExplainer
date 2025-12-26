@@ -17,11 +17,9 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
     const [showPaywall, setShowPaywall] = useState(false);
 
     // Status text logic
-    // Unpaid: Preview Mode · Watermark Applied
-    // Paid: Export Mode · Watermark Removed
     const statusText = isPaid
-        ? "Session Active · Valid until tab closed"
-        : "Preview Mode · Watermark Applied";
+        ? "Full Access · Session Active"
+        : "Preview Mode · Unlock for full explanation";
 
     return (
         <>
@@ -50,16 +48,15 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
                         </div>
 
                         {/* CTA Rules: 
-                            - Unpaid: Only "Export Clean PDF ($5)" -> Opens Paywall
-                            - Paid: "Export PDF" -> Calls export
-                            - No secondary buttons in unpaid
+                            - Unpaid: "Get Full Explanation" -> Opens Paywall
+                            - Paid: "Download Summary" -> Calls export
                         */}
                         {!isPaid ? (
                             <button
                                 onClick={() => setShowPaywall(true)}
                                 className="px-4 py-2 rounded-lg font-medium transition-all bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
                             >
-                                Export Clean PDF ($5)
+                                Get Full Explanation
                             </button>
                         ) : (
                             // Only show Export PDF if file is loaded
@@ -69,7 +66,7 @@ export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderPr
                                     className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all flex items-center gap-2 shadow-sm"
                                 >
                                     <Download className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Export PDF</span>
+                                    <span className="hidden sm:inline">Download Summary</span>
                                 </button>
                             )
                         )}
