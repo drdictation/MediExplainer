@@ -10,6 +10,7 @@ import { PDFUploader } from './PDFUploader';
 import { PageCanvas } from '../canvas/PageCanvas';
 import { Header } from './Header';
 import { Loader2 } from 'lucide-react';
+import { loadAppState, clearAppState } from '../../lib/storage';
 
 export function Workspace() {
     const location = useLocation();
@@ -25,10 +26,49 @@ export function Workspace() {
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('success') === 'true') {
-            setIsPaid(true);
-        }
+        const init = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('session_id');
+
+            if (sessionId) {
+                console.log('[Workspace] Session ID detected, verifying...', sessionId);
+                try {
+                    const res = await fetch(`/api/verify-payment?session_id=${sessionId}`);
+                    const data = await res.json();
+
+                    if (res.ok && data.verified) {
+                        console.log('[Workspace] Payment verified by server.');
+                        setIsPaid(true);
+
+                        // Restore state
+                        const { file: savedFile, redactions: savedRedactions } = await loadAppState();
+
+                        if (savedFile) {
+                            console.log('[Workspace] Saved file found, restoring...');
+                            await handleFileSelect(savedFile);
+                            if (savedRedactions) {
+                                console.log('[Workspace] Restoring redactions:', savedRedactions.length);
+                                setRedactions(savedRedactions);
+                            }
+                        } else {
+                            console.warn('[Workspace] No saved file found in storage.');
+                        }
+                        // Clear state after restoring
+                        await clearAppState();
+
+                        // Clean URL
+                        window.history.replaceState({}, '', window.location.pathname);
+                    } else {
+                        console.error('[Workspace] Payment verification failed:', data.error);
+                        alert('Payment verification failed. Please contact support if you were charged.');
+                    }
+                } catch (err) {
+                    console.error('[Workspace] Error verifying payment:', err);
+                }
+            }
+        };
+        init();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleFileSelect = async (selectedFile: File) => {

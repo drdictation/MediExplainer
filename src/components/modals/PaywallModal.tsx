@@ -28,7 +28,11 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                 <div className="space-y-2 text-center">
                     <h2 className="text-2xl font-bold text-gray-900">Ready to Share This Document?</h2>
                     <p className="text-gray-600 text-lg">
-                        Your preview includes a watermark. Remove it to export a clean PDF where pages behave like images (no selectable text).
+                        Your preview includes a watermarked safety layer. Remove it to export a flattened, compliance-ready PDF (visual-only data).
+                    </p>
+                    <p className="text-sm text-gray-500 pt-2 flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Secure Processing: Files are processed locally in your browser and are not uploaded to our servers.
                     </p>
                 </div>
 
@@ -41,7 +45,10 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                         setIsLoading(true);
                         try {
                             if (file) {
+                                console.log('[PaywallModal] File present, saving state...');
                                 await saveAppState(file, redactions);
+                            } else {
+                                console.warn('[PaywallModal] No file prop present, skipping save state');
                             }
 
                             const response = await fetch('/api/create-checkout-session', {

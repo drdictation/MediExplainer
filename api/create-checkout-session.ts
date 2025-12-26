@@ -17,7 +17,7 @@ export default async function handler(req: any, res: any) {
                 },
             ],
             mode: 'payment',
-            success_url: `${req.headers.origin}/?success=true`,
+            success_url: `${req.headers.origin}/?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.headers.origin}/`,
         });
 
