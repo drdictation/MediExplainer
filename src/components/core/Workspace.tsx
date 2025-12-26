@@ -186,21 +186,22 @@ export function Workspace() {
                         </p>
 
                         <p className="text-lg sm:text-lg font-medium text-gray-600 max-w-xl mx-auto leading-relaxed">
-                            Designed for careful, manual redaction when accuracy matters.
+                            {routeConfig.howThisWorks}
                         </p>
 
-                        <p className="text-sm text-gray-500">
-                            Files are processed locally in your browser. No server upload.
-                        </p>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm text-sm text-gray-600">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                            {routeConfig.trustSignals}
+                        </div>
                     </div>
 
-                    <PDFUploader onFileSelect={handleFileSelect} isProcessing={isProcessing} />
+                    <PDFUploader onFileSelect={handleFileSelect} isProcessing={isProcessing} ctaText={routeConfig.ctaText} />
 
-                    <div className="grid sm:grid-cols-4 gap-6 max-w-5xl w-full px-4 text-center">
-                        {routeConfig.bullets.map((bullet, idx) => (
-                            <div key={idx} className="space-y-2">
-                                <div className="font-semibold text-gray-900">{bullet.title || 'Feature'}</div>
-                                <p className="text-sm text-gray-500">{bullet.text}</p>
+                    <div className="grid sm:grid-cols-3 gap-8 max-w-5xl w-full px-4 text-center">
+                        {routeConfig.whyThisMatters.map((bullet, idx) => (
+                            <div key={idx} className="space-y-2 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                                <div className="font-semibold text-gray-900 text-lg">{bullet.title}</div>
+                                <p className="text-base text-gray-500 leading-relaxed">{bullet.text}</p>
                             </div>
                         ))}
                     </div>

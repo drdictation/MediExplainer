@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 interface PDFUploaderProps {
     onFileSelect: (file: File) => void;
     isProcessing?: boolean;
+    ctaText?: string;
 }
 
 const MAX_SIZE_MB = 10;
@@ -15,7 +16,7 @@ export function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs));
 }
 
-export function PDFUploader({ onFileSelect, isProcessing = false }: PDFUploaderProps) {
+export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Select PDF to Redact' }: PDFUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -111,7 +112,7 @@ export function PDFUploader({ onFileSelect, isProcessing = false }: PDFUploaderP
 
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">
-                            {isProcessing ? 'Processing PDF...' : 'Select PDF to Redact'}
+                            {isProcessing ? 'Processing PDF...' : ctaText}
                         </h3>
                         <p className="text-sm text-gray-500 max-w-xs mx-auto">
                             {error || "Drag and drop or click to browse. Files never leave your device."}

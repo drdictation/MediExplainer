@@ -33,9 +33,9 @@ export function SEOEnforcer() {
             {shouldNoIndex && <meta name="robots" content="noindex" />}
 
             {/* Default Meta from Config */}
-            <title>{routeConfig.title}</title>
+            <title>{routeConfig.metaTitle}</title>
             <meta name="description" content={routeConfig.metaDescription} />
-            <meta property="og:title" content={routeConfig.title} />
+            <meta property="og:title" content={routeConfig.metaTitle} />
             <meta property="og:description" content={routeConfig.metaDescription} />
             <meta property="og:url" content={`${window.location.origin}${routeConfig.path}`} />
 
