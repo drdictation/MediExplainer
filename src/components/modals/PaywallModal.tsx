@@ -46,7 +46,7 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                         try {
                             if (file) {
                                 console.log('[PaywallModal] File present, saving state...');
-                                await saveAppState(file, redactions);
+                                await saveAppState({ file, redactions });
                             } else {
                                 console.warn('[PaywallModal] No file prop present, skipping save state');
                             }

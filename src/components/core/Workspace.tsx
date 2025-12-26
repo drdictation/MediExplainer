@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import * as pdfjsLib from 'pdfjs-dist';
 import { loadPDF } from '../../lib/pdf-engine';
-import { findSuggestions } from '../../lib/auto-suggest';
-import { exportRedactedPDF } from '../../lib/export';
 import { getRouteConfig } from '../../lib/landingCopy';
-import type { Redaction } from '../../types';
 import { PDFUploader } from './PDFUploader';
 import { PageCanvas } from '../canvas/PageCanvas';
 import { Header } from './Header';
-import { Loader2 } from 'lucide-react';
-import { loadAppState, clearAppState } from '../../lib/storage';
+import { ExplanationPanel } from './ExplanationPanel';
 import { Footer } from './Footer';
+import { extractTextFromPDF } from '../../lib/explain/extractText';
+import { generatePreview } from '../../lib/explain/preview';
+import { generateExplanation } from '../../lib/explain/generateLLM';
+import type { PreviewData, FullExplanation } from '../../lib/explain/types';
+import { generateSummaryPDF } from '../../lib/exportSummary'; // Add this
+import { loadAppState, clearAppState, saveAppState } from '../../lib/storage';
+import { Loader2 } from 'lucide-react';
 
 export function Workspace() {
     const location = useLocation();
@@ -20,9 +23,12 @@ export function Workspace() {
     const [file, setFile] = useState<File | null>(null);
     const [pages, setPages] = useState<pdfjsLib.PDFPageProxy[]>([]);
 
-    const [redactions, setRedactions] = useState<Redaction[]>([]);
+    // Core Logic State
     const [isProcessing, setIsProcessing] = useState(false);
-    const [exporting, setExporting] = useState(false);
+    const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+    const [fullExplanation, setFullExplanation] = useState<FullExplanation | null>(null);
+    const [rawText, setRawText] = useState<string>('');
+
     const [isPaid, setIsPaid] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -45,33 +51,30 @@ export function Workspace() {
                         if (typeof window.gtag === 'function') {
                             window.gtag('event', 'conversion', {
                                 'send_to': 'AW-17755885311/rtPjCMC9rNcbEP-d1ZJC',
-                                'value': 5.0,
+                                'value': 19.99,
                                 'currency': 'USD',
                                 'transaction_id': sessionId
                             });
                         }
 
                         // Restore state
-                        const { file: savedFile, redactions: savedRedactions } = await loadAppState();
+                        const { file: savedFile, fullExplanation: savedExplanation } = await loadAppState() as any;
 
                         if (savedFile) {
                             console.log('[Workspace] Saved file found, restoring...');
                             await handleFileSelect(savedFile);
-                            if (savedRedactions) {
-                                console.log('[Workspace] Restoring redactions:', savedRedactions.length);
-                                setRedactions(savedRedactions);
+                            // If we have saved explanation, strict restore
+                            if (savedExplanation) {
+                                setFullExplanation(savedExplanation);
+                            } else {
+                                // If paid but no explanation yet (edge case), trigger generation
+                                // We need raw text for this, which is extracted in handleFileSelect wait...
+                                // handleFileSelect is async. We might inevitably re-extract.
                             }
-                        } else {
-                            console.warn('[Workspace] No saved file found in storage.');
                         }
                         // Clear state after restoring
                         await clearAppState();
-
-                        // Clean URL
                         window.history.replaceState({}, '', window.location.pathname);
-                    } else {
-                        console.error('[Workspace] Payment verification failed:', data.error);
-                        alert('Payment verification failed. Please contact support if you were charged.');
                     }
                 } catch (err) {
                     console.error('[Workspace] Error verifying payment:', err);
@@ -82,18 +85,29 @@ export function Workspace() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Effect to trigger Full Generation once Paid and Text is ready
     useEffect(() => {
-        // Warning before leaving if paid session is active
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isPaid) {
-                e.preventDefault();
-                e.returnValue = ''; // Required for most browsers
-            }
-        };
+        if (isPaid && rawText && !fullExplanation && !isProcessing) {
+            console.log('[Workspace] Paid & Ready. Generatng Full Explanation...');
+            const runGen = async () => {
+                setIsProcessing(true);
+                try {
+                    const expl = await generateExplanation({
+                        text: rawText,
+                        reportType: previewData?.reportType || 'general',
+                        useLLM: true
+                    });
+                    setFullExplanation(expl);
+                } catch (e) {
+                    console.error("Generation failed", e);
+                } finally {
+                    setIsProcessing(false);
+                }
+            };
+            runGen();
+        }
+    }, [isPaid, rawText, fullExplanation, isProcessing, previewData]);
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isPaid]);
 
     const handleFileSelect = async (selectedFile: File) => {
         setIsProcessing(true);
@@ -107,7 +121,20 @@ export function Workspace() {
             }
             setPages(loadedPages);
 
-            runAutoSuggest(loadedPages);
+            // 1. Extract Text
+            const { fullText } = await extractTextFromPDF(doc);
+            setRawText(fullText);
+
+            // 2. Generate Preview
+            const preview = await generatePreview(fullText); // Now async
+            setPreviewData(preview);
+
+            // Save state for potential reload after payment
+            if (!isPaid) {
+                // We can't save 'fullText' easily in IDB if it's huge, but file is saved.
+                // We'll re-extract on reload.
+                await saveAppState({ file: selectedFile, redactions: [] }); // Legacy key
+            }
 
         } catch (err) {
             console.error(err);
@@ -118,59 +145,51 @@ export function Workspace() {
         }
     };
 
-    const runAutoSuggest = async (loadedPages: pdfjsLib.PDFPageProxy[]) => {
-        const newRedactions: Redaction[] = [];
-
-        for (let i = 0; i < loadedPages.length; i++) {
-            const suggestions = await findSuggestions(loadedPages[i], i);
-            newRedactions.push(...suggestions);
-        }
-
-        if (newRedactions.length > 0) {
-            setRedactions(prev => [...prev, ...newRedactions]);
+    const handleUnlock = async () => {
+        setIsProcessing(true);
+        try {
+            const res = await fetch('/api/create-checkout-session', { method: 'POST' });
+            const data = await res.json();
+            if (data.url) {
+                // Save state before redirect
+                await saveAppState({
+                    file: file,
+                    // Store strict raw text? Maybe not needed if we have file.
+                    metadata: { previewData }
+                });
+                window.location.href = data.url;
+            } else {
+                alert('Could not initiate checkout.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error starting checkout.');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
     const handleExport = async () => {
-        if (!isPaid) return; // Security check: Prevent export for unpaid users
-        if (!file || exporting) return;
-        setExporting(true);
-        try {
-            console.log('[Workspace] Starting export...', {
-                fileName: file.name,
-                fileType: file.type,
-                fileSize: file.size,
-                redactionCount: redactions.length,
-                isPaid
-            });
-            const pdfBytes = await exportRedactedPDF(file, redactions, isPaid);
+        if (!fullExplanation || !file) return;
 
-            const blob = new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
+        try {
+            const pdfBytes = await generateSummaryPDF(fullExplanation, file.name);
+            const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `redacted-${file.name}`;
+            link.download = `Medical_Explanation_${file.name}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            console.log('[Workspace] Export successful');
-
-        } catch (err: any) {
-            console.error('[Workspace] Export error:', err);
-            alert(`Export failed: ${err.message || err}`);
-        } finally {
-            setExporting(false);
+        } catch (e) {
+            console.error("Export failed", e);
+            alert("Failed to generate PDF summary.");
         }
     };
 
-    const addRedaction = (r: Redaction) => {
-        setRedactions(prev => [...prev, r]);
-    };
-
-    const removeRedaction = (id: string) => {
-        setRedactions(prev => prev.filter(r => r.id !== id));
-    };
+    // --- RENDER ---
 
     if (!file) {
         return (
@@ -178,15 +197,14 @@ export function Workspace() {
                 <Header isPaid={isPaid} hasFile={false} />
                 <div className="flex-1 flex flex-col items-center justify-center p-4 gap-12">
                     <div className="text-center space-y-4 max-w-2xl mx-auto mt-8 sm:mt-16">
-                        <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                        <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 tracking-tight leading-tight">
                             {routeConfig.h1}
                         </h1>
-                        <p className="text-lg sm:text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-                            {routeConfig.subhead}
+                        <p className="text-lg sm:text-lg text-gray-900 font-medium max-w-xl mx-auto border border-blue-100 bg-blue-50 p-4 rounded-lg">
+                            {routeConfig.disclaimer}
                         </p>
-
-                        <p className="text-lg sm:text-lg font-medium text-gray-600 max-w-xl mx-auto leading-relaxed">
-                            {routeConfig.howThisWorks}
+                        <p className="text-gray-600 max-w-xl mx-auto leading-relaxed">
+                            {routeConfig.subhead}
                         </p>
 
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm text-sm text-gray-600">
@@ -199,14 +217,14 @@ export function Workspace() {
 
                     <div className="grid sm:grid-cols-3 gap-8 max-w-5xl w-full px-4 text-center">
                         {routeConfig.whyThisMatters.map((bullet, idx) => (
-                            <div key={idx} className="space-y-2 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div key={idx} className="space-y-2 p-4 bg-white rounded-xl shadow-sm border border-gray-100 transform hover:scale-105 transition-transform">
                                 <div className="font-semibold text-gray-900 text-lg">{bullet.title}</div>
                                 <p className="text-base text-gray-500 leading-relaxed">{bullet.text}</p>
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex-1" /> {/* Spacer */}
+                    <div className="flex-1" />
                     <Footer />
                 </div>
             </div>
@@ -214,91 +232,75 @@ export function Workspace() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-100/50 relative">
+        <div className="h-screen flex flex-col bg-gray-100 overflow-hidden">
             <Header
                 isPaid={isPaid}
                 hasFile={true}
                 onExport={handleExport}
                 file={file}
-                redactions={redactions}
             />
 
-            <div className="sticky top-16 z-40 bg-white/90 backdrop-blur border-b px-4 py-2 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{file.name}</span>
-                    <span className="text-gray-300">|</span>
-                    <span>{pages.length} Pages</span>
-                    <span className="text-gray-300">|</span>
-                    <span className="text-xs text-gray-500">Limits: up to 10 pages, 10MB</span>
-                </div>
+            {/* Main Workspace: Split View */}
+            <div className="flex-1 flex overflow-hidden relative">
 
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowResetConfirm(true)}
-                        className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1"
-                    >
-                        Reset
-                    </button>
-                    {showResetConfirm && (
-                        <div className="fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full space-y-4">
-                                <h3 className="text-lg font-bold text-gray-900">Clear all redactions?</h3>
-                                <p className="text-gray-600">This will remove all redaction boxes and return to the upload screen.</p>
-                                <div className="flex gap-3 justify-end">
-                                    <button
-                                        onClick={() => setShowResetConfirm(false)}
-                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setRedactions([]);
-                                            setFile(null);
-                                            setPages([]);
-                                            setShowResetConfirm(false);
-                                        }}
-                                        className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                            </div>
+                {/* PDF Viewer (Left/Center) */}
+                <div className="flex-1 overflow-y-auto bg-gray-200/50 p-4 sm:p-8 flex flex-col items-center gap-6 relative">
+                    {/* Sticky Info Bar */}
+                    <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border rounded-full px-6 py-2 flex items-center justify-between shadow-sm w-full max-w-2xl mb-4">
+                        <span className="font-medium text-gray-700 truncate max-w-[200px]">{file.name}</span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs text-gray-500">{pages.length} Pages</span>
+                            <button onClick={() => setShowResetConfirm(true)} className="text-xs text-red-500 font-bold hover:underline">
+                                START OVER
+                            </button>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
 
-            <div className="max-w-4xl mx-auto p-4 sm:p-8 flex flex-col items-center gap-8">
-                {pages.map((page, index) => (
-                    <div key={index} className="relative w-full">
-                        <div className="absolute -left-8 sm:-left-12 top-0 text-xs text-gray-400 font-mono hidden sm:block">
-                            Page {index + 1}
-                        </div>
-
-                        <div className="flex justify-center">
+                    {pages.map((page, index) => (
+                        <div key={index} className="relative shadow-xl">
                             <PageCanvas
                                 page={page}
                                 pageIndex={index}
-                                redactions={redactions}
-                                onAddRedaction={addRedaction}
-                                onRemoveRedaction={removeRedaction}
+                                redactions={[]} // No visual redactions for now
+                                onAddRedaction={() => { }} // Disabled
+                                onRemoveRedaction={() => { }}
                                 isPaid={isPaid}
                             />
                         </div>
-                    </div>
-                ))}
+                    ))}
+                    <div className="h-20" />
+                </div>
 
-                <div className="h-20" /> {/* Spacer */}
+                {/* Explanation Panel (Right Sidebar) */}
+                <div className="z-40 h-full shadow-2xl">
+                    <ExplanationPanel
+                        isPaid={isPaid}
+                        previewData={previewData}
+                        fullExplanation={fullExplanation}
+                        onUnlock={handleUnlock}
+                    />
+                </div>
             </div>
 
-            {exporting && (
-                <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center backdrop-blur-sm">
-                    <div className="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
-                        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-                        <div className="text-center">
-                            <h3 className="text-lg font-bold text-gray-900">Flattening Document</h3>
-                            <p className="text-gray-500">Converting to flattened images...</p>
+            {/* Overlays */}
+            {isProcessing && (
+                <div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+                        <h3 className="text-xl font-bold text-gray-900">Analyzing Document...</h3>
+                        <p className="text-gray-500">Extracting medical terms and identifying sections.</p>
+                    </div>
+                </div>
+            )}
+
+            {showResetConfirm && (
+                <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4">
+                        <h3 className="text-lg font-bold text-gray-900">Start Over?</h3>
+                        <p className="text-gray-600">This will clear the current analysis and return to the home screen.</p>
+                        <div className="flex gap-3 justify-end">
+                            <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Cancel</button>
+                            <button onClick={() => { setFile(null); setPages([]); setShowResetConfirm(false); }} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium">Yes, Start Over</button>
                         </div>
                     </div>
                 </div>

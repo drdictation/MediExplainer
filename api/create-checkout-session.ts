@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: process.env.STRIPE_PRICE_ID,
+                    price: process.env.STRIPE_PRICE_ID_STANDARD || process.env.STRIPE_PRICE_ID, // Use dedicated env var
                     quantity: 1,
                 },
             ],
