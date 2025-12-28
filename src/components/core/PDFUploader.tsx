@@ -1,3 +1,4 @@
+import { track } from '../../lib/analytics';
 import React, { useCallback, useState } from 'react';
 import { Upload, FileWarning, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -86,6 +87,7 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
                     type="file"
                     accept="application/pdf"
                     onChange={onInputChange}
+                    onClick={() => track('click_upload_cta', { source: 'uploader_dropzone' })}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                     disabled={isProcessing}
                 />

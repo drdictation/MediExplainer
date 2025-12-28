@@ -17,6 +17,7 @@ import { AnalysisProgress, type AnalysisStep } from './AnalysisProgress';
 import { SuccessOverlay } from './SuccessOverlay';
 import { EmailModal } from '../modals/EmailModal';
 import { LandingPageTemplate } from '../landing/LandingPageTemplate';
+import { track, trackOnce } from '../../lib/analytics';
 
 export function Workspace() {
     const location = useLocation();
@@ -57,15 +58,15 @@ export function Workspace() {
                         console.log('[Workspace] Payment verified by server.');
                         setIsPaid(true);
 
-                        // Fire Google Ads Conversion
-                        if (typeof window.gtag === 'function') {
-                            window.gtag('event', 'conversion', {
-                                'send_to': 'AW-17755885311/rtPjCMC9rNcbEP-d1ZJC',
-                                'value': 19.99,
-                                'currency': 'USD',
-                                'transaction_id': sessionId
-                            });
-                        }
+                        setIsPaid(true);
+
+                        // Fire Google Ads Conversion + Analytics
+                        track('purchase_completed', {
+                            transaction_id: sessionId,
+                            value: 19.99,
+                            currency: 'USD',
+                            page_path: window.location.pathname
+                        });
 
                         // Restore state
                         const restored = await loadAppState() as any;
@@ -116,6 +117,9 @@ export function Workspace() {
 
                             if (savedExplanation) {
                                 setFullExplanation(savedExplanation);
+                                trackOnce(`unlock_restored_${sessionId}`, 'full_report_unlocked', {
+                                    file_size_kb: savedFile.size / 1024
+                                });
                             }
                         }
 
@@ -154,6 +158,10 @@ export function Workspace() {
                     });
                     setFullExplanation(expl);
                     setAnalysisStep('complete');
+                    track('full_report_unlocked', {
+                        file_type: 'pdf', // Assuming PDF
+                        source: 'generated_fresh'
+                    });
                 } catch (e) {
                     console.error("Generation failed", e);
                 } finally {
@@ -168,6 +176,13 @@ export function Workspace() {
 
 
     const handleFileSelect = async (selectedFile: File) => {
+        // Track Start
+        track('upload_started', {
+            file_name: selectedFile.name,
+            file_size_kb: Math.round(selectedFile.size / 1024),
+            file_type: selectedFile.type
+        });
+
         setIsProcessing(true);
         setIsFullGenMode(false);
         setAnalysisStep('uploading');
@@ -198,6 +213,13 @@ export function Workspace() {
             const preview = await generatePreview(doc);
             setPreviewData(preview);
 
+            track('preview_rendered', {
+                page_count: doc.numPages
+            });
+            track('paywall_shown', {
+                source: 'post_upload_preview'
+            });
+
             // Done - save state
             setAnalysisStep('complete');
             saveAppState({
@@ -208,6 +230,11 @@ export function Workspace() {
                 metadata: {
                     lastUpload: Date.now()
                 }
+            });
+
+            track('upload_completed', {
+                file_name: selectedFile.name,
+                page_count: pages.length
             });
 
         } catch (err) {
@@ -221,6 +248,9 @@ export function Workspace() {
     };
 
     const handleUnlock = async () => {
+        track('purchase_initiated', {
+            source: 'unlock_button'
+        });
         setIsProcessing(true);
         try {
             const res = await fetch('/api/create-checkout-session', { method: 'POST' });

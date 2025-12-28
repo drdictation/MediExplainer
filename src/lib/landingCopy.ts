@@ -106,8 +106,8 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         path: '/what-is-ipmn-pancreas-ct-mri-report',
         primarySearchIntent: 'IPMN Pancreas CT MRI',
         h1: 'IPMN pancreas on CT or MRI report: what it means',
-        subhead: 'A simple guide to understanding Intraductal Papillary Mucinous Neoplasm mentions in radiology reports.',
-        summary: 'An IPMN (Intraductal Papillary Mucinous Neoplasm) is a type of fluid-filled cyst that forms in the pancreas. It is a common finding on improved quality CT and MRI scans, and while many are benign (non-cancerous) and simply monitored, some types require closer follow-up.',
+        subhead: 'Why the exact wording in your report matters more than the diagnosis label',
+        summary: 'IPMN is a common finding on modern CT and MRI scans. But the same word can describe very different situations depending on size, duct involvement, and specific phrases used by the radiologist. This tool explains your exact report wording, not just the definition.',
 
         definition: `
             <p><strong>IPMN</strong> stands for <strong>Intraductal Papillary Mucinous Neoplasm</strong>.</p>
@@ -115,54 +115,51 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
                 <li><strong>Intraductal:</strong> It grows inside the "ducts" (tubes) of the pancreas.</li>
                 <li><strong>Papillary:</strong> Under a microscope, the cells look like tiny fingers or fronds.</li>
                 <li><strong>Mucinous:</strong> It produces thick fluid called mucin.</li>
-                <li><strong>Neoplasm:</strong> A medical term for "new growth" or abnormal growth of cells (which can be benign or premalignant).</li>
+                <li><strong>Neoplasm:</strong> A medical term for "new growth".</li>
             </ul>
-            <p>Think of it as a small "bubble" or cyst growing in the drainage system of the pancreas.</p>
         `,
         whyItAppears: `
-            <p>IPMNs are often found "incidentally," meaning they are discovered when you undergo a CT or MRI scan for a completely different reason. Because modern scanners are so detailed, they pick up very small cysts that might not have been visible years ago.</p>
-            <p>Radiologists describe them based on where they are located in the duct system:</p>
+            <p>IPMNs are often found "incidentally" on scans done for other reasons. Because modern scanners are so detailed, they pick up very small cysts that might not have been visible years ago.</p>
+            <p>Radiologists describe them based on potential risk:</p>
             <ul>
-                <li><strong>Main Duct IPMN:</strong> Located in the primary drainage tube of the pancreas.</li>
-                <li><strong>Side Branch IPMN:</strong> Located in the smaller branches feeding into the main duct (often considered lower risk).</li>
-                <li><strong>Mixed Type:</strong> Involves both.</li>
+                <li><strong>Main Duct IPMN:</strong> In the primary drainage tube (often higher concern).</li>
+                <li><strong>Side Branch IPMN:</strong> In the smaller branches (often lower concern).</li>
             </ul>
         `,
         whatItDoesNotMean: `
             <p>Seeing "IPMN" on a report <strong>does NOT automatically mean you have pancreatic cancer.</strong></p>
-            <p>Many IPMNs are indolent (slow-growing) and may never cause harm. However, because they have a <em>potential</em> to change over time, doctors usually recommend a schedule of surveillance (repeat scans) rather than ignoring them.</p>
+            <p>Many IPMNs are indolent (slow-growing) and stable. The risk depends entirely on the "worrisome features" or "high-risk stigmata" mentioned in the text of your report.</p>
         `,
         reportWording: `
-            <p>Here are some phrases you might see and how they relate to the cyst's features:</p>
+            <p><strong>The context is everything.</strong> Your report likely contains specific adjectives that change the meaning:</p>
             <ul>
-                <li><strong>"Worrisome features":</strong> A specific medical checklist (like cyst size >3cm or thickened walls) that suggests the cyst needs closer expert evaluation.</li>
-                <li><strong>"High-risk stigmata":</strong> Signs that are more concerning and often trigger a referral to a surgeon or gastroenterologist for discussion.</li>
-                <li><strong>"Communication with the pancreatic duct":</strong> This is a key feature that helps radiologists diagnose a cyst as an IPMN rather than another type of cyst.</li>
+                <li><strong>"Worrisome features":</strong> A specific medical checklist (like cyst size >3cm) that triggers closer follow-up.</li>
+                <li><strong>"High-risk stigmata":</strong> Signs that suggest a need for expert evaluation.</li>
+                <li><strong>"Communication with duct":</strong> A key diagnostic detail distinguishing it from other cysts.</li>
             </ul>
         `,
         questions: [
-            "What type of IPMN does the report suggest I have (Side-branch, Main-duct, or Mixed)?",
-            "Did the radiologist mention any 'worrisome features' or 'high-risk stigmata'?",
-            "Do I need a follow-up scan, and if so, in how many months?",
-            "Should I be referred to a gastroenterologist or pancreas specialist?",
-            "Are there any blood tests (like CA 19-9) that you recommend tracking along with the imaging?",
-            "Is an endoscopic ultrasound (EUS) needed to look at it more closely?"
+            "Does the report specify if this is Side-branch, Main-duct, or Mixed type?",
+            "Did the radiologist identify any current 'worrisome features'?",
+            "based on the size, do I need a follow-up MRI in 6 months or 1 year?",
+            "Is a referral to a gastroenterologist recommended for this specific finding?",
+            "Should I track CA 19-9 blood levels?"
         ],
         faq: [
-            { question: "Is an IPMN a tumor?", answer: "Technically yes, 'neoplasm' means tumor, but in this context, it often refers to a pre-cancerous cyst. Many are benign but have the potential to progress." },
-            { question: "Can IPMN disappear?", answer: "It is rare for an IPMN to disappear on its own. They are usually stable or slowly growing." },
-            { question: "Is surgery always needed?", answer: "No. Surgery is typically reserved for IPMNs that show high-risk features. Many small, stable side-branch IPMNs are just watched with yearly MRI or CT." }
+            { question: "Is an IPMN a tumor?", answer: "Technically yes, 'neoplasm' means tumor, but in this context, it usually refers to a precancerous cyst that needs monitoring." },
+            { question: "Can it disappear?", answer: "Rarely. Usually, they are stable or grow very slowly over years." },
+            { question: "Is surgery always needed?", answer: "No. Surgery is typically reserved for IPMNs that show specific high-risk changes. Many are just watched safely." }
         ],
         relatedTopics: [
             { title: "Lung Nodule on CT", path: "/lung-nodule-ct-scan-report-meaning" },
             { title: "Fatty Liver on Ultrasound", path: "/fatty-liver-hepatic-steatosis-meaning" }
         ],
-        whyThisMatters: [], // Fallback empty
+        whyThisMatters: [],
         howThisWorks: 'Upload your CT or MRI report.',
         trustSignals: 'Private • Educational • Radiology Explainer',
         ctaText: 'Explain My Pancreas Report',
         metaTitle: 'IPMN Pancreas on CT or MRI Report | Meaning & Explanation',
-        metaDescription: 'Found "IPMN" on your pancreas CT or MRI report? Learn what Intraductal Papillary Mucinous Neoplasm means, why it appears, and questions to ask your doctor.',
+        metaDescription: 'Found "IPMN" on your pancreas CT or MRI report? Learn why specific wording like "Main Duct" vs "Side Branch" matters for your diagnosis.',
         disclaimer: COMMON_DISCLAIMER
     },
 
@@ -170,49 +167,47 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         path: '/lung-nodule-ct-scan-report-meaning',
         primarySearchIntent: 'Lung Nodule CT Scan',
         h1: 'Lung Nodule on CT scan report: what it means',
-        subhead: 'Found a "nodule" or "spot" on your lung scan? Here is a plain English guide to what that term describes.',
-        summary: 'A lung nodule is a small round or oval spot in the lungs. They are extremely common on CT scans and the vast majority are benign (non-cancerous), caused by past infections or scar tissue, though they do require strict monitoring to ensure they don\'t grow.',
+        subhead: 'Why the specific size and texture in your report matter more than the nodule finding itself',
+        summary: 'Lung nodules are extremely common and the vast majority are benign. However, terms like "ground-glass", "spiculated", or "calcified" completely change the safety profile. This tool explains your exact report wording to help you understand the context.',
         definition: `
-            <p>A <strong>lung nodule</strong> (or pulmonary nodule) is simply a "spot" or shadow seen on an X-ray or CT scan. It is typically smaller than 3 centimeters (about 1.2 inches).</p>
+            <p>A <strong>lung nodule</strong> is simply a "spot" or shadow seen on a scan. It describes <em>what it looks like</em>, not what it is.</p>
             <ul>
                 <li><strong>Solitary Pulmonary Nodule:</strong> A single spot.</li>
-                <li><strong>Ground-glass opacity:</strong> A hazy spot that you can see through (like frosted glass), which can have different causes than a solid white spot.</li>
-                <li><strong>Calcified:</strong> Contains calcium, which is often a sign of a healed, old issue (benign).</li>
+                <li><strong>Ground-glass opacity:</strong> A hazy spot (like frosted glass).</li>
+                <li><strong>Calcified:</strong> Contains calcium (often a sign of a sealed-off, old issue).</li>
             </ul>
         `,
         whyItAppears: `
-            <p>CT scans are incredibly sensitive. They can see spots as small as a grain of rice. Common reasons nodules appear include:</p>
+            <p>CT scanners are incredibly sensitive and see spots as small as a grain of rice. Common causes include:</p>
             <ul>
-                <li><strong>Old Infections:</strong> Past fungal infections or tuberculosis can leave small scars.</li>
-                <li><strong>Inflammation:</strong> Rheumatoid arthritis or sarcoidosis.</li>
-                <li><strong>Lymph nodes:</strong> Small filters in the lung that can swell.</li>
-                <li><strong>Early tumors:</strong> In some cases, a nodule can be an early lung cancer, which is why monitoring is key.</li>
+                <li><strong>Old Infections:</strong> Healed scars from past colds or fungal exposures.</li>
+                <li><strong>Lymph nodes:</strong> Small filters in the lung that serve the immune system.</li>
+                <li><strong>Inflammation:</strong> Reactive tissue from dust or allergies.</li>
             </ul>
         `,
         whatItDoesNotMean: `
             <p>A nodule does <strong>NOT</strong> automatically mean lung cancer.</p>
-            <p>Studies show that over 95% of small nodules found on screening CTs are benign. However, "benign" is a diagnosis that is often confirmed over time—if it doesn\'t grow for 2 years, it is usually considered safe.</p>
+            <p>Over 95% of small nodules found on screening CTs are benign. The urgency depends on the size (millimeters matter) and stability (has it changed since last time?).</p>
         `,
         reportWording: `
-            <p>Radiologists use specific guidelines (often called <strong>Fleischner Society guidelines</strong> or <strong>Lung-RADS</strong>) to decide what to do:</p>
+            <p>Radiologists use strict guidelines (Lung-RADS) to classify risk. Look for these keywords:</p>
             <ul>
-                <li><strong>"Spiculated margins":</strong> Edges that look like a starburst or spikes (a feature that needs closer look).</li>
-                <li><strong>"Smooth/calcified":</strong> Features that generally suggest a benign (safe) cause.</li>
-                <li><strong>"Stable":</strong> Unchanged from a previous scan (very good news).</li>
+                <li><strong>"Spiculated":</strong> Edges that look spiked (a feature needing attention).</li>
+                <li><strong>"Smooth" or "Calcified":</strong> Features that strongly suggest a benign cause.</li>
+                <li><strong>"Stable":</strong> Unchanged from prior scans (the best news).</li>
             </ul>
         `,
         questions: [
-            "What is the exact size of the nodule?",
-            "Is the nodule solid, ground-glass, or part-solid?",
-            "Does it look calcified or have smooth edges?",
-            "Do I need a follow-up CT scan, and if so, in 3, 6, or 12 months?",
-            "Are there old scans we can compare this to, to see if it's new?",
-            "Does my smoking history change the risk level?"
+            "What is the exact size of the nodule in millimeters?",
+            "Is it described as solid, ground-glass, or part-solid?",
+            "Are there old scans to compare it to?",
+            "Does the report recommend a follow-up scan in 3, 6, or 12 months?",
+            "Is the nodule calcified?"
         ],
         faq: [
-            { question: "What size nodule is dangerous?", answer: "Risk increases with size. Nodules under 6mm are very low risk. Nodules over 8mm often require closer follow-up or a PET scan." },
-            { question: "Can a lung nodule go away?", answer: "Yes, if it was caused by a temporary infection or inflammation, it can disappear on a future scan." },
-            { question: "What is a 'watch and wait' approach?", answer: "It is the standard safety protocol. Because biopsies have risks, doctors prefer to re-scan in a few months to see if the nodule grows before doing invasive tests." }
+            { question: "What size is dangerous?", answer: "Nodules under 6mm are very low risk. Nodules over 8mm generally require closer follow-up or testing." },
+            { question: "Can stress cause nodules?", answer: "No, but past infections or environmental irritants can cause inflammatory nodules." },
+            { question: "What is 'Watch and Wait'?", answer: "It is a safety protocol. Instead of risky surgery, doctors re-scan to see if the nodule grows. If it's stable for 2 years, it's usually safe." }
         ],
         relatedTopics: [
             { title: "Low eGFR on Blood Test", path: "/low-egfr-blood-test-meaning" },
@@ -222,8 +217,8 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         howThisWorks: 'Upload your Chest CT report.',
         trustSignals: 'Private • Educational • Radiology Explainer',
         ctaText: 'Explain My CT Report',
-        metaTitle: 'Lung Nodule on CT Scan Report | Meaning & Explanation',
-        metaDescription: 'Found a lung nodule on your CT scan? reliable explanation of what pulmonary nodules are, when they are worrisome, and questions to ask your doctor.',
+        metaTitle: 'Lung Nodule on CT Scan Report | Meaning & Analysis',
+        metaDescription: 'Found a lung nodule on your CT scan? Learn why terms like "ground-glass" or "calcified" matter for understanding your report.',
         disclaimer: COMMON_DISCLAIMER
     },
 
@@ -231,45 +226,38 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         path: '/fatty-liver-hepatic-steatosis-meaning',
         primarySearchIntent: 'Fatty Liver Ultrasound',
         h1: 'Fatty Liver / Hepatic Steatosis on ultrasound: what it means',
-        subhead: 'Understanding "hepatic steatosis" and fatty liver findings on your abdominal ultrasound or CT scan.',
-        summary: 'Hepatic steatosis is the medical term for fatty liver—a build-up of excess fat in the liver cells. It is a very common finding often linked to metabolic health, diet, or alcohol use, and is typically reversible with lifestyle changes.',
+        subhead: 'Why the "Grade" and specific ultrasound description matter for your liver health',
+        summary: 'Hepatic steatosis is a very common finding, but reports use specific technical phrases like "coarsened echotexture" or "focal sparing" to describe the severity and type. This tool explains exactly what your ultrasound report is describing.',
         definition: `
-            <p><strong>Hepatic Steatosis</strong> comes from <em>Hepatic</em> (liver) and <em>Steatosis</em> (fat retention).</p>
-            <p>On an ultrasound, fat makes the liver look "brighter" (more echogenic) than the kidney next to it. It basically means the liver is storing more fat than it should.</p>
+            <p><strong>Hepatic Steatosis</strong> means the liver cells are storing too much fat.</p>
+            <p>On ultrasound, this fat reflects sound waves, making the liver look "bright" (echogenic) compared to the kidney. It is a sign of metabolic stress on the liver.</p>
         `,
         whyItAppears: `
-            <p>The liver is the body's metabolic engine. Excess fat piles up there due to:</p>
-            <ul>
-                <li><strong>Metabolic factors:</strong> Weight gain, insulin resistance, or type 2 diabetes (MASLD/NAFLD).</li>
-                <li><strong>Alcohol intake:</strong> Regular alcohol consumption (MetALD).</li>
-                <li><strong>Medications:</strong> Certain drugs can cause fat deposits.</li>
-            </ul>
+            <p>It typically appears due to metabolic factors (weight, sugar processing) or alcohol intake. The liver acts as a filter, and when overwhelmed, it stores energy as fat.</p>
         `,
         whatItDoesNotMean: `
-            <p>Simple fatty liver does <strong>NOT</strong> necessarily mean you have permanent liver damage or cirrhosis.</p>
-            <p>It is often the earliest stage of liver change ("steatosis"). The next stage, if it progresses, involves inflammation ("steatohepatitis" or MASH). Catching it at the fatty stage is often considered a "warning light" rather than permanent damage.</p>
+            <p>Simple fatty liver does <strong>NOT</strong> means you have cirrhosis or permanent liver failure.</p>
+            <p>It is often the first, reversible stage. However, distinguishing it from "fibrosis" (scarring) is key.</p>
         `,
         reportWording: `
-            <p>Radiologists grade the severity based on how "bright" the liver looks:</p>
+            <p>The adjectives used in the report define the severity:</p>
             <ul>
-                <li><strong>Mild / Grade 1:</strong> Slight increase in brightness.</li>
-                <li><strong>Moderate / Grade 2:</strong> Obscures the walls of the blood vessels.</li>
-                <li><strong>Severe / Grade 3:</strong> Makes it hard to see the diaphragm or deeper liver structures.</li>
-                <li><strong>"Coarsened echotexture":</strong> A phrase that <em>might</em> suggest more chronic changes or fibrosis, distinct from simple fat.</li>
+                <li><strong>"Mild / Grade 1":</strong> Early changes.</li>
+                <li><strong>"Severe / Grade 3":</strong> Significant fat infiltration obscuring deep structures.</li>
+                <li><strong>"Coarsened echotexture":</strong> A phrase that can suggest underlying chronic changes or fibrosis (scarring) in addition to the fat.</li>
             </ul>
         `,
         questions: [
-            "Is the report showing just fatty liver, or are there signs of scarring (fibrosis/cirrhosis)?",
-            "Do I need a FibroScan (elastography) to check for liver stiffness?",
-            "Should I check my liver function tests (ALT/AST) in my blood work?",
-            "Is this likely due to alcohol, diet, or medications?",
-            "What specific lifestyle changes (weight loss, diet) do you recommend?",
-            "Do I need to see a hepatologist (liver specialist)?"
+            "Does the report just mention 'steatosis' (fat), or also 'fibrosis' or 'coarsened texture'?",
+            "Is the liver size (hepatomegaly) normal or enlarged?",
+            "Do I need a FibroScan to check for stiffness/scarring?",
+            "Are my liver enzymes (ALT/AST) elevated on blood work?",
+            "Is this reversible with lifestyle changes?"
         ],
         faq: [
-            { question: "Is fatty liver reversible?", answer: "Yes, in many cases. Losing 10% of body weight is often cited as a way to significantly reduce liver fat." },
-            { question: "Does fatty liver cause pain?", answer: "Usually, no. It is a 'silent' condition. Some people feel mild fullness in the upper right abdomen." },
-            { question: "What is MASLD?", answer: "Metabolic Dysfunction-Associated Steatotic Liver Disease. It is the new, more accurate medical term for Non-Alcoholic Fatty Liver Disease (NAFLD)." }
+            { question: "Is it reversible?", answer: "Yes, usually. Weight loss is the most effective treatment for reducing liver fat." },
+            { question: "Is it painful?", answer: "Rarely. It is usually a silent condition found accidentally on imaging." },
+            { question: "What is MASLD?", answer: "The new medical term for Non-Alcoholic Fatty Liver Disease, focusing on metabolic dysfunction." }
         ],
         relatedTopics: [
             { title: "Low eGFR on Blood Test", path: "/low-egfr-blood-test-meaning" },
@@ -279,8 +267,8 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         howThisWorks: 'Upload your ultrasound report.',
         trustSignals: 'Private • Educational • Liver Health',
         ctaText: 'Explain My Ultrasound Report',
-        metaTitle: 'Fatty Liver (Hepatic Steatosis) on Ultrasound | Meaning',
-        metaDescription: 'Diagnosed with Hepatic Steatosis or Fatty Liver on ultrasound? Learn what this common finding means, its causes, and questions for your doctor.',
+        metaTitle: 'Fatty Liver (Hepatic Steatosis) Ultrasound | Meaning & Grades',
+        metaDescription: 'Diagnosed with Hepatic Steatosis? Learn why the specific "Grade" and terms like "coarsened echotexture" matter for your long-term health.',
         disclaimer: COMMON_DISCLAIMER
     },
 
@@ -288,44 +276,38 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         path: '/adenomatous-polyp-pathology-report-meaning',
         primarySearchIntent: 'Adenomatous Polyp Pathology',
         h1: 'Adenomatous Polyp on pathology report: what it means',
-        subhead: 'Understanding your colonoscopy results and what "adenoma" means for your cancer risk.',
-        summary: 'An adenomatous polyp (or adenoma) is a benign growth found in the colon during a colonoscopy. It is considered "pre-cancerous," meaning it had the potential to turn into cancer if left alone, but removing it effectively breaks that chain.',
+        subhead: 'Why the specific type of polyp determines your cancer risk and follow-up timeline',
+        summary: 'Not all polyps are the same. A "tubular adenoma" has a completely different safety profile and timeline than a "villous" or "serrated" polyp. This tool explains the specific pathology terms found in your report so you understand your risk.',
         definition: `
-            <p><strong>Adenomatous Polyp:</strong> A growth of tissue from the lining of the colon.</p>
-            <ul>
-                <li><strong>Tubular Adenoma:</strong> The most common type (tube-shaped cells).</li>
-                <li><strong>Villous Adenoma:</strong> Less common, often larger, with finger-like projections (higher risk).</li>
-                <li><strong>Tubulovillous Adenoma:</strong> A mix of both.</li>
-                <li><strong>Sessile vs. Pedunculated:</strong> Sessile means flat/broad-based; pedunculated means on a stalk (like a mushroom).</li>
-            </ul>
+            <p>An <strong>Adenomatous Polyp</strong> (adenoma) is a growth that is considered "pre-cancerous."</p>
+            <p>This does not mean it is cancer. It means it had the <em>potential</em> to turn into cancer years in the future if it hadn't been removed.</p>
         `,
         whyItAppears: `
-            <p>Polyps grow due to genetic changes in the lining of the bowel. They are very common in adults over 45. The goal of screening colonoscopy is specifically to find and remove these <em>before</em> they can ever turn into cancer.</p>
+            <p>They are caused by genetic changes in the colon lining cells. They are the target of colonoscopies—finding and removing them breaks the chain to cancer.</p>
         `,
         whatItDoesNotMean: `
-            <p>Having an adenoma does <strong>NOT</strong> mean you have colon cancer.</p>
-            <p>It means you have a risk factor. By removing the polyp, the doctor has removed that specific threat. However, because you grew one, you are more likely to grow another, which affects when your next colonoscopy should be.</p>
+            <p>It does <strong>NOT</strong> mean you have colon cancer.</p>
+            <p>The "adenoma" label confirms that the preventative procedure worked—the risk was identified and removed. The focus now shifts to "when do I need to check again?"</p>
         `,
         reportWording: `
-            <p>Pathology reports look for high-grade features:</p>
+            <p>Your pathology report contains the details that calculate your future risk:</p>
             <ul>
-                <li><strong>"Low-grade dysplasia":</strong> The cells look slightly abnormal (standard for adenomas).</li>
-                <li><strong>"High-grade dysplasia":</strong> The cells look very disorganized and closer to cancer (requires stricter follow-up).</li>
-                <li><strong>"Margins negative":</strong> The doctor completely removed the polyp (good news).</li>
+                <li><strong>"Tubular":</strong> The most common, standard risk type.</li>
+                <li><strong>"Villous" or "High-Grade Dysplasia":</strong> Features that suggest the polyp was further along the pathway, often requiring closer follow-up.</li>
+                <li><strong>"Margins negative":</strong> Confirms the polyp was completely cut out.</li>
             </ul>
         `,
         questions: [
-            "How many polyps did you find in total?",
-            "Was the polyp completely removed?",
-            "Did the pathology show 'high-grade dysplasia'?",
-            "Based on this, when should I have my next colonoscopy (e.g., 3, 5, or 10 years)?",
-            "Do my family members need to start screening earlier because of this?",
-            "Should I change my diet or fiber intake?"
+            "Was the polyp completely removed (margins negative)?",
+            "Did it show any 'high-grade dysplasia'?",
+            "Based on the number and type of polyps, is my next colonoscopy in 3, 5, or 10 years?",
+            "Do I need to inform my siblings or children to start screening earlier?",
+            "Was it sessile (flat) or pedunculated (on a stalk)?"
         ],
         faq: [
-            { question: "Is a polyp cancer?", answer: "Most polyps are benign. Adenomas are 'pre-cancerous,' meaning they could become cancer years down the road if not removed." },
-            { question: "What is the difference between hyperplastic and adenomatous?", answer: "Hyperplastic polyps are usually very low risk and not considered pre-cancerous. Adenomatous polyps carry a higher risk." },
-            { question: "Does this mean I'm high risk?", answer: "It depends on the number and size. People with 3+ adenomas or large adenomas (>1cm) are often considered higher risk for recurrence." }
+            { question: "Is it cancer?", answer: "No. Adenomas are benign but have the potential to become cancer." },
+            { question: "What is a hyperplastic polyp?", answer: "A different type of polyp that typically has zero cancer potential. It is 'safer' than an adenoma." },
+            { question: "Does this increase my risk?", answer: "People who grow adenomas are 'polyp formers' and are essentially at slightly higher risk of growing more, which is why surveillance intervals are shortened." }
         ],
         relatedTopics: [
             { title: "Low eGFR on Blood Test", path: "/low-egfr-blood-test-meaning" },
@@ -335,8 +317,8 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         howThisWorks: 'Upload your pathology report.',
         trustSignals: 'Private • Educational • Pathology Explainer',
         ctaText: 'Explain My Pathology Report',
-        metaTitle: 'Adenomatous Polyp on Pathology Report | Meaning & Risk',
-        metaDescription: 'Pathology report say "Adenomatous Polyp"? Learn what tubular and villous adenomas are, and what they mean for your colonoscopy follow-up.',
+        metaTitle: 'Adenomatous Polyp Pathology Report | Meaning & Risk',
+        metaDescription: 'Pathology report say "Adenomatous Polyp"? Learn why terms like "Tubular" vs "Villous" determine your cancer risk and colonoscopy schedule.',
         disclaimer: COMMON_DISCLAIMER
     },
 
@@ -344,50 +326,43 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         path: '/low-egfr-blood-test-meaning',
         primarySearchIntent: 'Low eGFR Blood Test',
         h1: 'Low eGFR on blood test: what it means',
-        subhead: 'A guide to understanding Estimated Glomerular Filtration Rate and kidney function numbers.',
-        summary: 'eGFR (Estimated Glomerular Filtration Rate) is a number that indicates how well your kidneys are filtering waste from your blood. A "low" number suggests reduced kidney function, but this can be temporary (dehydration) or persistent (chronic kidney disease).',
+        subhead: 'Why a single number doesn\'t tell the whole story of your kidney health',
+        summary: 'eGFR can fluctuate significantly due to hydration, diet, and age. Doctors rarely rely on a single result; they look for trends and specific context. This tool explains what your specific lab values indicate about your kidney function.',
         definition: `
-            <p><strong>eGFR:</strong> A calculated number based on your blood creatinine level, age, and sex.</p>
-            <ul>
-                <li><strong>> 90:</strong> Normal kidney function.</li>
-                <li><strong>60 - 89:</strong> Mildly reduced function (often normal with age).</li>
-                <li><strong>< 60:</strong> Indicates potential Chronic Kidney Disease (CKD) if persistent for 3+ months.</li>
-                <li><strong>< 15:</strong> Kidney failure.</li>
-            </ul>
+            <p><strong>eGFR</strong> (Estimated Glomerular Filtration Rate) is a math calculation, not a direct measurement.</p>
+            <p>It estimates how much blood your kidneys filter per minute based on the level of waste (creatinine) in your blood, plus your age and sex.</p>
         `,
         whyItAppears: `
-            <p>Creatinine is a waste product from muscles. Healthy kidneys filter it out. If kidneys slow down, creatinine rises, and the calculated eGFR drops. Common causes for a drop include:</p>
+            <p>A "low" reading often flags automatically on lab reports. It can be caused by:</p>
             <ul>
-                <li><strong>Dehydration:</strong> Not drinking enough water before the test.</li>
-                <li><strong>High Blood Pressure / Diabetes:</strong> The two biggest stressors on kidneys.</li>
-                <li><strong>Medications:</strong> NSAIDs (ibuprofen) or certain blood pressure meds.</li>
-                <li><strong>Age:</strong> Kidney function naturally declines slightly as we get older.</li>
+                <li><strong>True Kidney Strain:</strong> Diabetes or high blood pressure over time.</li>
+                <li><strong>Temporary Factors:</strong> Dehydration, heavy exercise, or a high-protein meal before the test.</li>
+                <li><strong>Age:</strong> eGFR naturally drops as we get older (which is normal).</li>
             </ul>
         `,
         whatItDoesNotMean: `
-            <p>One low reading does <strong>NOT</strong> automatically mean you have permanent kidney failure.</p>
-            <p>Doctors look for a <em>trend</em>. eGFR can fluctuate day to day. A diagnosis of Chronic Kidney Disease (CKD) usually requires two low tests spaced at least 3 months apart.</p>
+            <p>One low result does <strong>NOT</strong> automatically mean you have kidney failure.</p>
+            <p>Chronic Kidney Disease (CKD) is defined as a sustained low eGFR for more than 3 months. A single result is just a snapshot.</p>
         `,
         reportWording: `
-            <p>You might see:</p>
+            <p>Look for these details in the report:</p>
             <ul>
-                <li><strong>"CKD Stage":</strong> Doctors stage kidney disease from 1 to 5 based on the eGFR number.</li>
-                <li><strong>"Stable":</strong> The number hasn't changed much from last year (often the goal).</li>
-                <li><strong>"Creatinine":</strong> The actual chemical measured in the blood used to calculate the eGFR.</li>
+                <li><strong>"Stage":</strong> CKD is staged 1-5. Stage 1-2 often have normal eGFR but other signs of damage. Stage 3a/3b is where "low eGFR" usually begins.</li>
+                <li><strong>"Creatinine":</strong> If this number is stable compared to last year, a slight drop in eGFR might just be due to age formulas.</li>
+                <li><strong>"Albumin/Creatinine Ratio":</strong> A separate urine test that checks for actual damage/leakage.</li>
             </ul>
         `,
         questions: [
-            "Was I dehydrated during this test?",
-            "Do I need to repeat the test in 3 months to confirm?",
-            "Is my urine protein (albumin) level also elevated?",
-            "Should I avoid certain painkillers (NSAIDs) like ibuprofen?",
-            "Is my blood pressure in a safe range for my kidneys?",
-            "What stage of kidney disease does this represent, if any?"
+            "Was I dehydrated when I took this test?",
+            "How does this compare to my eGFR from last year? Is it stable?",
+            "Do I have any protein in my urine (albuminuria)?",
+            "Should I avoid NSAIDs/ibuprofen?",
+            "Do I need to re-test in 3 months to confirm if this is chronic?"
         ],
         faq: [
-            { question: "Can eGFR improve?", answer: "Yes. If the drop was due to dehydration or acute illness, it can bounce back. However, chronic scarring is usually permanent, so the goal is to stop it from getting worse." },
-            { question: "Does a high protein diet affect eGFR?", answer: "Yes, eating a lot of cooked meat can temporarily raise creatinine levels, which might falsely lower your eGFR calculation." },
-            { question: "What is a normal eGFR for my age?", answer: "eGFR naturally declines. A 20-year-old might have 110, while a healthy 80-year-old might have 65. Both can be considered 'normal' for their age." }
+            { question: "Can it improve?", answer: "Yes, especially if caused by dehydration or acute illness. Chronic scarring helps but stabilizing the number is the main goal." },
+            { question: "Does diet affect it?", answer: "Yes. Eating cooked meat raises creatinine, which lowers eGFR. Hydration raises eGFR." },
+            { question: "What is normal for my age?", answer: "It's not always >90. For a 70-year-old, an eGFR of 60-70 can be perfectly functional and normal." }
         ],
         relatedTopics: [
             { title: "Fatty Liver Meaning", path: "/fatty-liver-hepatic-steatosis-meaning" },
@@ -398,7 +373,7 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         trustSignals: 'Private • Educational • Kidney Health',
         ctaText: 'Explain My Lab Report',
         metaTitle: 'Low eGFR Blood Test Meaning | Kidney Function Explained',
-        metaDescription: 'Low eGFR on your blood test? Understand what Estimated Glomerular Filtration Rate means, stages of kidney function, and questions to ask your doctor.',
+        metaDescription: 'Low eGFR on your blood test? Learn why single results vary and how hydration or age affects your Estimated Glomerular Filtration Rate.',
         disclaimer: COMMON_DISCLAIMER
     }
 };

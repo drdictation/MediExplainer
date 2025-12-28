@@ -1,3 +1,5 @@
+
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { RouteConfig } from '../../lib/landingCopy';
 import { PDFUploader } from '../core/PDFUploader';
@@ -5,6 +7,7 @@ import { Header } from '../core/Header';
 import { Footer } from '../core/Footer';
 import { AlertCircle, HelpCircle, FileText, ShieldCheck, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { trackOnce } from '../../lib/analytics';
 
 interface LandingPageTemplateProps {
     config: RouteConfig;
@@ -13,6 +16,14 @@ interface LandingPageTemplateProps {
 }
 
 export function LandingPageTemplate({ config, onFileSelect, isProcessing }: LandingPageTemplateProps) {
+    // Analytics: Track Page View
+    useEffect(() => {
+        trackOnce(`view_${config.path}`, 'view_landing_page', {
+            page_name: config.path.replace('/', '') || 'home',
+            page_path: config.path
+        });
+    }, [config.path]);
+
     // Schema Generator
     const generateSchema = () => {
         const schema = [
@@ -72,43 +83,44 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
 
             <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16">
 
-                {/* 1. H1 & 2. Summary (Hero) */}
+                {/* 1. H1 & Hook (Hero) */}
                 <section className="text-center space-y-6">
                     <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                         {config.h1}
                     </h1>
+
+                    {/* Ads Hook Subhead - The "Why it matters" differentiation */}
+                    <p className="text-xl sm:text-2xl text-blue-900 font-bold max-w-3xl mx-auto leading-snug">
+                        {config.subhead}
+                    </p>
+
+                    {/* Context Paragraph */}
                     {config.summary && (
-                        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
+                        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
                             {config.summary}
                         </p>
                     )}
-                    {/* Fallback for existing pages using subhead if no summary */}
-                    {!config.summary && (
-                        <p className="text-lg sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed border border-blue-50 bg-blue-50/50 p-4 rounded-xl">
-                            {config.subhead}
-                        </p>
-                    )}
 
-                    <div className="flex justify-center pt-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm text-sm text-slate-500">
-                            <ShieldCheck className="w-4 h-4 text-green-500" />
+                    {/* Trust Signals - Moved closer to CTA */}
+                    <div className="flex justify-center pt-2 pb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 rounded-full border border-green-200 text-xs sm:text-sm text-green-800 font-medium">
+                            <ShieldCheck className="w-4 h-4 text-green-600" />
                             {config.trustSignals || "Private & Educational Only"}
                         </div>
                     </div>
                 </section>
 
-                {/* CTA - Above Fold */}
-                <section className="scroll-mt-20" id="upload">
-                    <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                        <div className="p-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-10" />
-                        <div className="p-6 sm:p-10 text-center space-y-6">
-                            <h2 className="text-xl font-semibold text-slate-900">
+                {/* CTA - Primary Action */}
+                <section className="scroll-mt-20 -mt-8" id="upload">
+                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden max-w-3xl mx-auto">
+                        <div className="p-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-100" />
+                        <div className="p-6 sm:p-8 text-center space-y-6">
+                            <h2 className="text-lg font-semibold text-slate-900 hidden sm:block">
                                 Upload your report to get a full explanation
                             </h2>
                             <PDFUploader onFileSelect={onFileSelect} isProcessing={isProcessing} ctaText={config.ctaText} />
-                            <p className="text-xs text-slate-400 mt-4">
-                                You'll see a free preview first. Full explanation requires payment.
-                                <br />Private & Secure • No "Doctor" Claims
+                            <p className="text-xs text-slate-400 mt-2">
+                                Free preview generated instantly. Full explanation available for purchase.
                             </p>
                         </div>
                     </div>
