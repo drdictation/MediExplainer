@@ -26,18 +26,19 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                 </button>
 
                 <div className="space-y-2 text-center">
-                    <h2 className="text-2xl font-bold text-gray-900">Ready to Share This Document?</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Unlock Full Medical Explanation?</h2>
                     <p className="text-gray-600 text-lg">
-                        Your preview includes a watermarked safety layer. Remove it to export a flattened, compliance-ready PDF (visual-only data).
+                        Get plain-language summaries, defined medical terms, and questions to ask your doctor.
+                        Stop googling and start understanding.
                     </p>
                     <p className="text-sm text-gray-500 pt-2 flex items-center justify-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        Local Processing: Files are processed locally in your browser and are not uploaded to our servers.
+                        Secure Processing: Files are processed securely. We don't sell your data.
                     </p>
                 </div>
 
                 <div className="bg-yellow-50 text-yellow-800 text-sm p-3 rounded-lg text-center font-medium">
-                    Note: Watermarked previews are not intended for final use.
+                    Note: This tool is for educational purposes only. It is not medical advice.
                 </div>
 
                 <button
@@ -71,7 +72,7 @@ export function PaywallModal({ isOpen, onClose, file, redactions }: PaywallModal
                     className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-                    Finalize & Export PDF ($5)
+                    Unlock Explanation ($19.99)
                 </button>
             </div>
         </div>
