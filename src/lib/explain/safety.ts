@@ -1,49 +1,83 @@
 import type { FullExplanation } from './types';
 
-const BANNED_PHRASES = [
+// REVISED SAFETY LOGIC: Claim-based, not vocabulary-based.
+// We allow "cancer", "tumor", etc., but block diagnosis and treatment advice.
+
+const DIAGNOSTIC_PATTERNS = [
     /you have/i,
-    /you suffer from/i,
     /you are diagnosed with/i,
-    /i recommend/i,
-    /you should/i,
-    /you must/i,
-    /urgent/i,
-    /emergency/i,
-    /life-threatening/i,
-    /cancer/i, // Context-dependent, but flagging for review. Actually, preventing "you have cancer" is key.
-    /tumor/i,
-    /malignancy/i
+    /this confirms/i,
+    /we confirm/i,
+    /evidence of (definite|certain)/i
 ];
 
-const SAFE_REPLACEMENT = "[Content Hidden: Potential medical advice or diagnosis detected. Please consult your clinician.]";
+const CERTAINTY_PATTERNS = [
+    /definitely/i,
+    /without (a )?doubt/i,
+    /guaranteed/i,
+    /100%/
+];
 
-function isSafeText(text: string): boolean {
-    for (const regex of BANNED_PHRASES) {
-        if (regex.test(text)) return false;
+const TREATMENT_PATTERNS = [
+    /start (taking|using)/i,
+    /stop (taking|using)/i,
+    /prescribe/i,
+    /surgery is required/i,
+    /you need (chemotherapy|radiation)/i,
+    /consult your doctor immediately/i // Alarmist
+];
+
+// Fallback message when a term cannot be safely explained
+export const FALLBACK_MSG = "This term appears in your report, but explaining it safely requires discussion with your clinician.";
+
+/**
+ * Deterministic check for disallowed speech acts.
+ * Returns true if the text is safe (no diagnosis/advice).
+ */
+export function isSafeText(text: string): boolean {
+    if (!text) return true;
+
+    // Check all banned patterns
+    const allPatterns = [
+        ...DIAGNOSTIC_PATTERNS,
+        ...CERTAINTY_PATTERNS,
+        ...TREATMENT_PATTERNS
+    ];
+
+    for (const pattern of allPatterns) {
+        if (pattern.test(text)) {
+            return false;
+        }
     }
     return true;
 }
 
+/**
+ * Sanitize the FullExplanation object.
+ * Enforces safety on all fields.
+ */
 export function sanitizeExplanation(explanation: FullExplanation): FullExplanation {
     const sanitized = { ...explanation };
 
     // 1. Sanitize Summary
     if (!isSafeText(sanitized.summary)) {
-        sanitized.summary = SAFE_REPLACEMENT;
+        sanitized.summary = FALLBACK_MSG;
     }
 
     // 2. Sanitize Sections
     sanitized.sections = sanitized.sections.map(s => {
         if (!isSafeText(s.summary)) {
-            return { ...s, summary: SAFE_REPLACEMENT };
+            return { ...s, summary: FALLBACK_MSG };
         }
         return s;
     });
 
-    // 3. Sanitize Glossary (definitions usually safe, but check)
+    // 3. Sanitize Glossary
     sanitized.glossary = sanitized.glossary.map(t => {
+        // If the definition contains unsafe claims, fallback.
+        // We do NOT block words like "cancer" anymore.
         if (!isSafeText(t.definition)) {
-            return { ...t, definition: "Definition unavailable." };
+            return { ...t, definition: FALLBACK_MSG };
         }
         return t;
     });
@@ -51,10 +85,15 @@ export function sanitizeExplanation(explanation: FullExplanation): FullExplanati
     // 4. Sanitize Questions (Context)
     sanitized.questions = sanitized.questions.map(q => {
         if (!isSafeText(q.context)) {
-            return { ...q, context: "Context hidden." };
+            return { ...q, context: "Context hidden for safety." };
         }
         return q;
     });
+
+    // 5. Sanitize Disclaimer (ensure it's not empty, though usually static)
+    if (!sanitized.disclaimer) {
+        sanitized.disclaimer = "This explanation is for educational purposes only and does not constitute medical advice.";
+    }
 
     return sanitized;
 }
