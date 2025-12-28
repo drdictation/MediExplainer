@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
         const htmlContent = generateEmailHTML(explanation, fileName);
 
         const { data, error } = await resend.emails.send({
-            from: 'ExplainMyMedicalReport <onboarding@resend.dev>',
+            from: 'ExplainMyMedicalReport <noreply@explainmymedicalreport.com>',
             to: [email],
             subject: `Your Medical Report Explanation - ${fileName || 'Report'}`,
             html: htmlContent,
