@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import type { PreviewData, FullExplanation } from '../../lib/explain/types';
-import { Lock, FileText, BookOpen, HelpCircle, Activity } from 'lucide-react';
+import { Lock, FileText, BookOpen, HelpCircle, Activity, Mail } from 'lucide-react';
 
 interface Props {
     isPaid: boolean;
     previewData: PreviewData | null;
     fullExplanation: FullExplanation | null;
     onUnlock: () => void;
+    onEmailClick?: () => void;
 }
 
-export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnlock }: Props) {
+export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnlock, onEmailClick }: Props) {
     const [activeTab, setActiveTab] = useState<'overview' | 'sections' | 'glossary' | 'questions'>('overview');
 
     if (!previewData && !fullExplanation) {
@@ -199,6 +200,20 @@ export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnloc
             {isPaid ? (
                 <>
                     {renderTabs()}
+
+                    {/* Email Button - Only for paid users */}
+                    {onEmailClick && fullExplanation && (
+                        <div className="px-4 py-2 border-b border-gray-100">
+                            <button
+                                onClick={onEmailClick}
+                                className="w-full flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                            >
+                                <Mail className="w-4 h-4" />
+                                Email This Explanation
+                            </button>
+                        </div>
+                    )}
+
                     {renderFullContent()}
                 </>
             ) : (

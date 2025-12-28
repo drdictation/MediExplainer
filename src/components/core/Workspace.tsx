@@ -12,9 +12,12 @@ import { extractTextFromPDF } from '../../lib/explain/extractText';
 import { generatePreview } from '../../lib/explain/preview';
 import { generateExplanation } from '../../lib/explain/generateLLM';
 import type { PreviewData, FullExplanation } from '../../lib/explain/types';
-import { generateSummaryPDF } from '../../lib/exportSummary'; // Add this
+import { generateSummaryPDF } from '../../lib/exportSummary';
 import { loadAppState, clearAppState, saveAppState } from '../../lib/storage';
 import { Loader2 } from 'lucide-react';
+import { AnalysisProgress, type AnalysisStep } from './AnalysisProgress';
+import { SuccessOverlay } from './SuccessOverlay';
+import { EmailModal } from '../modals/EmailModal';
 
 export function Workspace() {
     const location = useLocation();
@@ -33,6 +36,11 @@ export function Workspace() {
 
     const [isPaid, setIsPaid] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [analysisStep, setAnalysisStep] = useState<AnalysisStep | null>(null);
+    const [isFullGenMode, setIsFullGenMode] = useState(false);
+    const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [isDemoMode, setIsDemoMode] = useState(false);
 
     useEffect(() => {
         const init = async () => {
@@ -115,6 +123,9 @@ export function Workspace() {
                         // Clear state after restoring
                         await clearAppState();
                         window.history.replaceState({}, '', window.location.pathname);
+
+                        // Show success overlay
+                        setShowSuccessOverlay(true);
                     }
                 } catch (err) {
                     console.error('[Workspace] Error verifying payment:', err);
@@ -130,21 +141,26 @@ export function Workspace() {
     // Effect to trigger Full Generation once Paid and Text is ready
     useEffect(() => {
         if (isPaid && (rawText || scannedImages.length > 0) && !fullExplanation && !isProcessing && previewData) {
-            console.log('[Workspace] Paid & Ready. Generatng Full Explanation...');
+            console.log('[Workspace] Paid & Ready. Generating Full Explanation...');
             const runGen = async () => {
                 setIsProcessing(true);
+                setIsFullGenMode(true);
+                setAnalysisStep('generating');
                 try {
                     const expl = await generateExplanation({
                         text: rawText,
                         reportType: previewData?.reportType || 'general',
                         useLLM: true,
-                        images: scannedImages // Pass images!
+                        images: scannedImages
                     });
                     setFullExplanation(expl);
+                    setAnalysisStep('complete');
                 } catch (e) {
                     console.error("Generation failed", e);
                 } finally {
                     setIsProcessing(false);
+                    setIsFullGenMode(false);
+                    setAnalysisStep(null);
                 }
             };
             runGen();
@@ -154,11 +170,14 @@ export function Workspace() {
 
     const handleFileSelect = async (selectedFile: File) => {
         setIsProcessing(true);
+        setIsFullGenMode(false);
+        setAnalysisStep('uploading');
         try {
             setFile(selectedFile);
-            setFullExplanation(null); // Clear old explanation
-            setScannedImages([]); // Clear old images
+            setFullExplanation(null);
+            setScannedImages([]);
 
+            // Step 1: Upload/Load PDF
             const doc = await loadPDF(selectedFile);
 
             const loadedPages: pdfjsLib.PDFPageProxy[] = [];
@@ -167,21 +186,21 @@ export function Workspace() {
             }
             setPages(loadedPages);
 
-            // 1. Extract Text & Images
+            // Step 2: Extract Text & Images
+            setAnalysisStep('extracting');
             const { fullText, images } = await extractTextFromPDF(doc);
             setRawText(fullText);
             if (images && images.length > 0) {
-                setScannedImages(images); // Store images
+                setScannedImages(images);
             }
 
-            // 2. Generate Preview
-            // Pass the DOC object so preview can re-extract/verify if needed, 
-            // OR just pass the extracted images if we refactor preview signature.
-            // Current signature of preview is `generatePreview(file, pdf)`
+            // Step 3: Identify Terms
+            setAnalysisStep('identifying');
             const preview = await generatePreview(doc);
             setPreviewData(preview);
 
-            // Save state for potential reload after payment
+            // Done - save state
+            setAnalysisStep('complete');
             saveAppState({
                 file: selectedFile,
                 rawText: fullText,
@@ -198,6 +217,7 @@ export function Workspace() {
             setFile(null);
         } finally {
             setIsProcessing(false);
+            setAnalysisStep(null);
         }
     };
 
@@ -245,6 +265,41 @@ export function Workspace() {
         }
     };
 
+    // Handle Demo Mode
+    const handleLoadDemo = async () => {
+        setIsProcessing(true);
+        setIsFullGenMode(false);
+        setAnalysisStep('uploading');
+        setIsDemoMode(true);
+
+        try {
+            // Fetch sample report data
+            const res = await fetch('/samples/sample-lab-report.json');
+            const sampleData = await res.json();
+
+            setAnalysisStep('extracting');
+
+            // Create a mock file for display purposes
+            const mockFile = new File(['Demo Report'], sampleData.fileName, { type: 'application/pdf' });
+            setFile(mockFile);
+            setPages([]); // No actual pages for demo
+
+            setAnalysisStep('identifying');
+            setRawText(sampleData.rawText);
+            setPreviewData(sampleData.previewData);
+
+            setAnalysisStep('complete');
+
+        } catch (err) {
+            console.error('Failed to load demo:', err);
+            alert('Failed to load sample report.');
+            setIsDemoMode(false);
+        } finally {
+            setIsProcessing(false);
+            setAnalysisStep(null);
+        }
+    };
+
     // --- RENDER ---
 
     if (!file && !isRestoring) {
@@ -270,6 +325,15 @@ export function Workspace() {
                     </div>
 
                     <PDFUploader onFileSelect={handleFileSelect} isProcessing={isProcessing} ctaText={routeConfig.ctaText} />
+
+                    {/* Demo Button */}
+                    <button
+                        onClick={handleLoadDemo}
+                        disabled={isProcessing}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm underline underline-offset-2 transition-colors disabled:opacity-50"
+                    >
+                        Or try a free sample report →
+                    </button>
 
                     <div className="grid sm:grid-cols-3 gap-8 max-w-5xl w-full px-4 text-center">
                         {routeConfig.whyThisMatters.map((bullet, idx) => (
@@ -305,6 +369,7 @@ export function Workspace() {
                 hasFile={true}
                 onExport={handleExport}
                 file={file}
+                isDemoMode={isDemoMode}
             />
 
             {/* Main Workspace: Split View */}
@@ -345,19 +410,17 @@ export function Workspace() {
                         previewData={previewData}
                         fullExplanation={fullExplanation}
                         onUnlock={handleUnlock}
+                        onEmailClick={() => setShowEmailModal(true)}
                     />
                 </div>
             </div>
 
             {/* Overlays */}
-            {isProcessing && (
-                <div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center backdrop-blur-sm">
-                    <div className="flex flex-col items-center gap-4">
-                        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
-                        <h3 className="text-xl font-bold text-gray-900">Analyzing Document...</h3>
-                        <p className="text-gray-500">Extracting medical terms and identifying sections.</p>
-                    </div>
-                </div>
+            {isProcessing && analysisStep && (
+                <AnalysisProgress
+                    currentStep={analysisStep}
+                    isFullGeneration={isFullGenMode}
+                />
             )}
 
             {showResetConfirm && (
@@ -372,6 +435,23 @@ export function Workspace() {
                     </div>
                 </div>
             )}
+
+            {/* Success Overlay - Post Payment */}
+            {showSuccessOverlay && (
+                <SuccessOverlay
+                    onClose={() => setShowSuccessOverlay(false)}
+                    onEmailClick={() => setShowEmailModal(true)}
+                    onDownloadClick={handleExport}
+                />
+            )}
+
+            {/* Email Modal */}
+            <EmailModal
+                isOpen={showEmailModal}
+                onClose={() => setShowEmailModal(false)}
+                explanationData={fullExplanation}
+                fileName={file?.name || 'Medical Report'}
+            />
         </div>
     );
 }

@@ -11,15 +11,18 @@ interface HeaderProps {
     hasFile?: boolean;
     file?: File | null;
     redactions?: Redaction[];
+    isDemoMode?: boolean;
 }
 
-export function Header({ onExport, isPaid, hasFile, file, redactions }: HeaderProps) {
+export function Header({ onExport, isPaid, hasFile, file, redactions, isDemoMode }: HeaderProps) {
     const [showPaywall, setShowPaywall] = useState(false);
 
     // Status text logic
-    const statusText = isPaid
-        ? "Full Access · Session Active"
-        : "Preview Mode · Unlock for full explanation";
+    const statusText = isDemoMode
+        ? "Demo Mode · Sample Report"
+        : isPaid
+            ? "Full Access · Session Active"
+            : "Preview Mode · Unlock for full explanation";
 
     return (
         <>
