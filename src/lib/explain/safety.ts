@@ -6,7 +6,8 @@ import type { FullExplanation } from './types';
 // 1. Diagnostic Claims (You have...)
 const DIAGNOSTIC_CLAIMS = [
     /\b(you|your)\b.*\b(have|has|need|must|should|require|start|stop)\b/i,
-    /\bthis (confirms|indicates|proves|means)\b/i
+    /\bthis (confirms|indicates|proves|means)\b/i,
+    /\b(findings|results|report|analysis) (indicate|indicates|confirm|confirms|show|shows|identify|identifies)\b/i
 ];
 
 // 2. Prognosis / Survival

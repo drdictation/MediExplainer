@@ -22,8 +22,8 @@ export default async function handler(req: any, res: any) {
 
     // Helper to try generation with fallback models
     async function generateWithFallback(systemInstruction: string, prompt: string, imageParts?: any[]) {
-        // STRICTLY use Gemini 2.5 Flash as requested
-        const modelsToTry = ["gemini-2.5-flash-lite", "gemini-1.5-pro"];
+        // UPGRADE: Use 2.5 Flash Standard (Non-Lite) for maximum quality
+        const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-pro"];
 
         let lastError;
         for (const modelName of modelsToTry) {
@@ -70,9 +70,9 @@ export default async function handler(req: any, res: any) {
 
         // PHASES IMPLEMENTATION
 
-        // Common Generative Model - Use 2.5 Flash
+        // Common Generative Model - Use 2.5 Flash Standard
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash-lite",
+            model: "gemini-2.5-flash",
             generationConfig: { responseMimeType: "application/json" }
         });
 
@@ -120,8 +120,8 @@ export default async function handler(req: any, res: any) {
             }
             RULES:
             1. ATTRIBUTION RULE (CRITICAL):
-               - NEVER say: "The analysis found", "This confirms", "The findings identify", "You have".
-               - NEVER use the verb "identify" or "identifies" for a condition.
+               - NEVER say: "The analysis found", "This confirms", "The findings identify", "The findings indicate", "You have".
+               - NEVER use verbs like "identify", "indicate", "confirm" for conditions.
                - ALWAYS use: "The report states...", "The findings describe...", "The report notes...".
                - Example: "The report describes findings consistent with..." OR "The report states that X was found."
             2. Do NOT define terms yet. Just list them in 'termCandidates'.
