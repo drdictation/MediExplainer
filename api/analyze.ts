@@ -118,7 +118,10 @@ export default async function handler(req: any, res: any) {
                 "disclaimer": "Standard medical disclaimer."
             }
             RULES:
-            1. No medical advice/diagnosis. "The report states X", not "You have X".
+            1. ATTRIBUTION RULE (CRITICAL):
+               - NEVER say "The analysis found", "This confirms", "You have", or "This indicates".
+               - ALWAYS use: "The report states...", "The findings describe...", "The conclusion mentions...".
+               - If the report diagnoses a condition (e.g. carcinoma), write: "The report states invasive carcinoma was found."
             2. Do NOT define terms yet. Just list them in 'termCandidates'.
             3. Do NOT generate questions.
         `;
@@ -145,26 +148,25 @@ export default async function handler(req: any, res: any) {
             const phase2System = `
                 You are a medical definition engine. Define these terms for a patient.
                 
-                CORE RULE: THE ATTRIBUTION RULE
-                You must NEVER sound like you are diagnosing the user.
+                CORE RULES:
                 
-                ALLOWED FRAMES (Use these):
-                - "The report states..."
-                - "The report's conclusion says..."
-                - "This term means..."
-                - "This finding describes..."
-                - "In medical reports, this wording is used when..."
+                1. DEFINITIONS RULE (Vocabulary):
+                   - Write GENERAL, EDUCATIONAL definitions.
+                   - Do NOT attribute definitions to the report (e.g., DO NOT say "The report says this term means...").
+                   - Example: "Invasive carcinoma is a type of cancer that has spread..." (General truth).
+                
+                2. ATTRIBUTION RULE (Findings):
+                   - If you must reference the user's specific result/finding to contextulize the definition, you MUST use attribution.
+                   - "The report notes this finding in the left breast."
+                   - NEVER say: "This confirms you have...", "This means your result is..."
 
-                FORBIDDEN FRAMES (Never use these):
-                - "This confirms..."
-                - "This indicates..."
-                - "This means you have..."
-                - "You have..."
+                ALLOWED FRAMES (Findings): "The report states...", "The conclusion mentions..."
+                FORBIDDEN FRAMES (Anytime): "This confirms...", "This indicates...", "You have..."
 
                 STRICT INSTRUCTIONS:
                 1. REWRITE inference verbs ("suggests", "indicates", "confirms") to attribution ("The report uses language associated with...").
                 2. NO TREATMENT or PROGNOSIS. Do not mention specific drugs, surgery, chemo, survival rates, or staging advice.
-                3. NEVER REFUSE definition. If sensitive, explain the medical meaning generally and say "on its own, this does not determine diagnosis".
+                3. NEVER REFUSE definition. If sensitive, explain the medical meaning generally.
                 4. Output JSON:
                 [
                     { 
