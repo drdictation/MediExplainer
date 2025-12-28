@@ -22,7 +22,8 @@ export default async function handler(req: any, res: any) {
 
     // Helper to try generation with fallback models
     async function generateWithFallback(systemInstruction: string, prompt: string, imageParts?: any[]) {
-        const modelsToTry = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite-preview-02-05", "gemini-1.5-flash"];
+        // STRICTLY use Gemini 2.5 Flash as requested
+        const modelsToTry = ["gemini-2.5-flash-lite", "gemini-1.5-pro"];
 
         let lastError;
         for (const modelName of modelsToTry) {
@@ -69,9 +70,9 @@ export default async function handler(req: any, res: any) {
 
         // PHASES IMPLEMENTATION
 
-        // Common Generative Model
+        // Common Generative Model - Use 2.5 Flash
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash-lite", // Use fast model for extraction/definition
+            model: "gemini-2.5-flash-lite",
             generationConfig: { responseMimeType: "application/json" }
         });
 
@@ -119,9 +120,10 @@ export default async function handler(req: any, res: any) {
             }
             RULES:
             1. ATTRIBUTION RULE (CRITICAL):
-               - NEVER say "The analysis found", "This confirms", "You have", or "This indicates".
-               - ALWAYS use: "The report states...", "The findings describe...", "The conclusion mentions...".
-               - If the report diagnoses a condition (e.g. carcinoma), write: "The report states invasive carcinoma was found."
+               - NEVER say: "The analysis found", "This confirms", "The findings identify", "You have".
+               - NEVER use the verb "identify" or "identifies" for a condition.
+               - ALWAYS use: "The report states...", "The findings describe...", "The report notes...".
+               - Example: "The report describes findings consistent with..." OR "The report states that X was found."
             2. Do NOT define terms yet. Just list them in 'termCandidates'.
             3. Do NOT generate questions.
         `;
