@@ -166,7 +166,7 @@ export async function generateSummaryPDF(explanation: FullExplanation, _original
     y -= 35;
 
     // DISCLAIMER (Top)
-    page.drawText('⚠️  ' + explanation.disclaimer, {
+    page.drawText('IMPORTANT: ' + explanation.disclaimer, {
         x: margin,
         y,
         size: 9,
@@ -179,18 +179,18 @@ export async function generateSummaryPDF(explanation: FullExplanation, _original
     drawDivider();
 
     // SUMMARY SECTION
-    drawSectionHeader('Summary', '📋');
+    drawSectionHeader('Summary');
     drawWrappedText(explanation.summary, 11, font, DARK_GRAY);
 
     drawDivider();
 
     // DETAILED SECTIONS
-    drawSectionHeader('Detailed Section Breakdown', '📖');
+    drawSectionHeader('Detailed Section Breakdown');
     for (const section of explanation.sections) {
         checkPageBreak(60);
 
         // Section title with arrow
-        page.drawText(`▸ ${section.originalTitle}`, {
+        page.drawText(`> ${section.originalTitle}`, {
             x: margin,
             y,
             size: 11,
@@ -207,11 +207,11 @@ export async function generateSummaryPDF(explanation: FullExplanation, _original
 
     // GLOSSARY
     if (explanation.glossary.length > 0) {
-        drawSectionHeader('Key Medical Terms', '🔬');
+        drawSectionHeader('Key Medical Terms');
         for (const term of explanation.glossary) {
             checkPageBreak(40);
 
-            page.drawText(`• ${term.term}`, {
+            page.drawText(`- ${term.term}`, {
                 x: margin,
                 y,
                 size: 10,
@@ -222,7 +222,7 @@ export async function generateSummaryPDF(explanation: FullExplanation, _original
             // Category tag
             const categoryTag = `[${term.category}]`;
             page.drawText(categoryTag, {
-                x: margin + font.widthOfTextAtSize(`• ${term.term}  `, 10),
+                x: margin + font.widthOfTextAtSize(`- ${term.term}  `, 10),
                 y,
                 size: 8,
                 font: font,
@@ -238,7 +238,7 @@ export async function generateSummaryPDF(explanation: FullExplanation, _original
 
     // QUESTIONS FOR DOCTOR
     if (explanation.questions.length > 0) {
-        drawSectionHeader('Questions for Your Clinician', '❓');
+        drawSectionHeader('Questions for Your Clinician');
         page.drawText('These suggested questions can help you discuss your results with your doctor.', {
             x: margin,
             y,
