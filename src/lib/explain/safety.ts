@@ -1,29 +1,22 @@
 import type { FullExplanation } from './types';
 
 // MVP SAFETY SPEC: Claim-based Blocking Only
-// We allow "cancer", "tumor", etc.
-// We block strict diagnosis ("You have") and prognosis ("survival").
+// Behavior: Drop offending sentences. Never block whole output. Never show "Definition unavailable".
 
+// 1. Diagnostic Claims (You have...)
 const DIAGNOSTIC_CLAIMS = [
-    /you have/i,
-    /you need/i,
-    /you should/i,
-    /start (taking|treatment)/i,
-    /stop (taking|treatment)/i,
-    /your diagnosis is/i
+    /\b(you|your)\b.*\b(have|has|need|must|should|require|start|stop)\b/i,
+    /\bthis (confirms|indicates|proves|means)\b/i
 ];
 
+// 2. Prognosis / Survival
 const PROGNOSIS_CLAIMS = [
-    /prognosis/i,
-    /survival rate/i,
-    /life expectancy/i,
-    /terminal (illness|cancer)/i,
-    /cure/i
+    /\bprognosis\b/i,
+    /\bsurvival\b/i,
+    /\blife expectancy\b/i,
+    /\bterminal\b/i,
+    /\bcure\b/i
 ];
-
-// If the Emergency Brake triggers (rare), we use this neutral educational fallback.
-// We avoid "Unavailable" to reduce user anxiety.
-export const FALLBACK_MSG = "This term is discussed in the report. For a specific interpretation of how it applies to you, please consult your clinician.";
 
 /**
  * Deterministic check for disallowed speech acts.
@@ -47,40 +40,50 @@ export function isSafeText(text: string): boolean {
 }
 
 /**
+ * Helper to process text: Split into sentences, filter unsafe ones, rejoin.
+ * If all sentences are dropped, return a minimal safe fallback.
+ */
+function cleanText(text: string): string {
+    if (!text) return text;
+
+    // Simple sentence splitter (matches periods, exclamation, question marks)
+    // We treat newlines as separators too.
+    const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+
+    const safeSentences = sentences.filter(s => isSafeText(s));
+
+    if (safeSentences.length === 0 && text.trim().length > 0) {
+        // Fallback only if EVERYTHING was unsafe.
+        return "This term is mentioned in the report.";
+    }
+
+    return safeSentences.join("").trim();
+}
+
+/**
  * Sanitize the FullExplanation object.
- * Enforces safety on all fields.
+ * Enforces safety on all fields by dropping unsafe sentences.
  */
 export function sanitizeExplanation(explanation: FullExplanation): FullExplanation {
     const sanitized = { ...explanation };
 
     // 1. Sanitize Summary
-    if (!isSafeText(sanitized.summary)) {
-        sanitized.summary = FALLBACK_MSG;
-    }
+    sanitized.summary = cleanText(sanitized.summary);
 
     // 2. Sanitize Sections
     sanitized.sections = sanitized.sections.map(s => {
-        if (!isSafeText(s.summary)) {
-            return { ...s, summary: FALLBACK_MSG };
-        }
-        return s;
+        return { ...s, summary: cleanText(s.summary) };
     });
 
     // 3. Sanitize Glossary
     sanitized.glossary = sanitized.glossary.map(t => {
-        // If the definition contains unsafe claims, fallback.
-        if (!isSafeText(t.definition)) {
-            return { ...t, definition: FALLBACK_MSG };
-        }
-        return t;
+        const cleanedDef = cleanText(t.definition);
+        return { ...t, definition: cleanedDef };
     });
 
     // 4. Sanitize Questions (Context)
     sanitized.questions = sanitized.questions.map(q => {
-        if (!isSafeText(q.context)) {
-            return { ...q, context: "Context hidden for safety." };
-        }
-        return q;
+        return { ...q, context: cleanText(q.context) };
     });
 
     // 5. Sanitize Disclaimer

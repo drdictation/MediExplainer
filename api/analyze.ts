@@ -147,15 +147,25 @@ export default async function handler(req: any, res: any) {
                 
                 CORE RULE: THE ATTRIBUTION RULE
                 You must NEVER sound like you are diagnosing the user.
-                Allowed frames: "The report states...", "This term means...", "In medical context, this describes..."
-                Forbidden frames: "You have...", "This confirms...", "Your diagnosis is...", "You need..."
+                
+                ALLOWED FRAMES (Use these):
+                - "The report states..."
+                - "The report's conclusion says..."
+                - "This term means..."
+                - "This finding describes..."
+                - "In medical reports, this wording is used when..."
 
-                OTHER RULES:
-                1. Educational, neutral tone.
-                2. NEVER refuse to define a term. If broad/vague, explain the general meaning.
-                3. Rewrite inference verbs ("suggests") to attribution ("report uses language associated with...").
-                4. NO TREATMENT ADVICE (drugs, surgery).
-                5. Output JSON:
+                FORBIDDEN FRAMES (Never use these):
+                - "This confirms..."
+                - "This indicates..."
+                - "This means you have..."
+                - "You have..."
+
+                STRICT INSTRUCTIONS:
+                1. REWRITE inference verbs ("suggests", "indicates", "confirms") to attribution ("The report uses language associated with...").
+                2. NO TREATMENT or PROGNOSIS. Do not mention specific drugs, surgery, chemo, survival rates, or staging advice.
+                3. NEVER REFUSE definition. If sensitive, explain the medical meaning generally and say "on its own, this does not determine diagnosis".
+                4. Output JSON:
                 [
                     { 
                         "term": "Term", 
@@ -163,33 +173,24 @@ export default async function handler(req: any, res: any) {
                         "safetyCheck": { "allowed": boolean, "rewrite": string | null } 
                     }
                 ]
-                If a definition contains diagnostic claims ("You have cancer"), set "allowed": false and provide a NEUTRAL attribution rewrite.
+                If a definition triggers a Forbidden Frame, provide a rewrite.
             `;
             const phase2Prompt = `Define these terms: ${JSON.stringify(termsToDefine)}`;
 
             const phase2Result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: phase2System + "\n\n" + phase2Prompt }] }] });
             const phase2Data = JSON.parse(phase2Result.response.text());
 
-            // Process Phase 2 Results (Phase 4 Enforcement)
+            // Process Phase 2 Results (Phase 4 Enforcement happens in safety.ts mostly, but we map here)
             finalGlossary = phase2Data.map((item: any) => {
                 let definition = item.definition;
 
                 // Phase 3 Check (LLM Self-Correction) applied in prompt
-                if (item.safetyCheck && !item.safetyCheck.allowed) {
-                    if (item.safetyCheck.rewrite) {
-                        definition = item.safetyCheck.rewrite;
-                    }
-                    // If no rewrite provided, we fallback to original definition 
-                    // We DO NOT block.
+                if (item.safetyCheck && !item.safetyCheck.allowed && item.safetyCheck.rewrite) {
+                    definition = item.safetyCheck.rewrite;
                 }
 
-                // Phase 4: Deterministic Enforcement (Server-Side using regex)
-                // Block ONLY direct diagnosis/prognosis claims.
-                const UNSAFE_REGEX = [/you have/i, /you are diagnosed/i, /start taking/i, /prognosis/i, /survival rate/i];
-                if (UNSAFE_REGEX.some(r => r.test(definition))) {
-                    // Last resort safe fallback
-                    definition = "This term is discussed in the report. For a specific interpretation of how it applies to you, please consult your clinician.";
-                }
+                // Note: safety.ts will do the final "drop offending sentence" check.
+                // We pass the raw string here.
 
                 return {
                     term: item.term,
@@ -200,6 +201,7 @@ export default async function handler(req: any, res: any) {
         }
 
         // HARDCODED QUESTIONS (Safety)
+        // Hard-coded templates to prevent treatment hallucinations
         const getQuestions = (type: string) => {
             const base = [
                 { question: "What is the next step?", context: "To understand the care plan." },
@@ -213,9 +215,9 @@ export default async function handler(req: any, res: any) {
                     { question: "Which specialists are usually involved in assessing this finding?", context: "To understand the care team." }
                 ],
                 "pathology": [
-                    { question: "What does this specific terminology imply about the cells?", context: "Pathology describes cellular changes." },
-                    { question: "How does this report influence treatment decisions?", context: "Pathology often guides therapy." },
-                    { question: "Is further testing on this sample possible?", context: "Molecular tests are sometimes run." }
+                    { question: "What additional information is still needed beyond this biopsy (e.g., grade vs stage)?", context: "To understand completeness of diagnosis." },
+                    { question: "Is there any additional testing typically reported on this sample (e.g., receptors), and is it already available here?", context: "To check for pending results." },
+                    { question: "Can you explain the difference between invasive cancer and in situ changes as used in this report?", context: "To clarify terminology." }
                 ],
                 "lab": [
                     { question: "What factors can cause this result to be out of range?", context: "Many things affect labs." },
