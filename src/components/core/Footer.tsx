@@ -4,7 +4,7 @@ export function Footer() {
         <footer className="mt-12 py-8 border-t border-gray-100 w-full animate-fade-in">
             <div className="max-w-4xl mx-auto px-4 text-center text-sm text-gray-500">
                 <p className="mb-2">
-                    <span className="font-semibold text-gray-700">MediExplainer</span> — Understand your medical reports in plain English.
+                    <span className="font-semibold text-gray-700">ExplainMyMedicalReport</span> — Understand your medical reports in plain English.
                 </p>
                 <p className="text-xs text-gray-400">
                     This tool provides educational explanations only. It does not provide medical advice, diagnosis, or treatment recommendations.
