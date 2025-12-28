@@ -3,11 +3,9 @@ import { useLocation } from 'react-router-dom';
 import * as pdfjsLib from 'pdfjs-dist';
 import { loadPDF } from '../../lib/pdf-engine';
 import { getRouteConfig } from '../../lib/landingCopy';
-import { PDFUploader } from './PDFUploader';
 import { PageCanvas } from '../canvas/PageCanvas';
 import { Header } from './Header';
 import { ExplanationPanel } from './ExplanationPanel';
-import { Footer } from './Footer';
 import { extractTextFromPDF } from '../../lib/explain/extractText';
 import { generatePreview } from '../../lib/explain/preview';
 import { generateExplanation } from '../../lib/explain/generateLLM';
@@ -18,6 +16,7 @@ import { Loader2 } from 'lucide-react';
 import { AnalysisProgress, type AnalysisStep } from './AnalysisProgress';
 import { SuccessOverlay } from './SuccessOverlay';
 import { EmailModal } from '../modals/EmailModal';
+import { LandingPageTemplate } from '../landing/LandingPageTemplate';
 
 export function Workspace() {
     const location = useLocation();
@@ -40,7 +39,7 @@ export function Workspace() {
     const [isFullGenMode, setIsFullGenMode] = useState(false);
     const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
-    const [isDemoMode, setIsDemoMode] = useState(false);
+
 
     useEffect(() => {
         const init = async () => {
@@ -265,89 +264,17 @@ export function Workspace() {
         }
     };
 
-    // Handle Demo Mode
-    const handleLoadDemo = async () => {
-        setIsProcessing(true);
-        setIsFullGenMode(false);
-        setAnalysisStep('uploading');
-        setIsDemoMode(true);
 
-        try {
-            // Fetch sample report data
-            const res = await fetch('/samples/sample-lab-report.json');
-            const sampleData = await res.json();
-
-            setAnalysisStep('extracting');
-
-            // Create a mock file for display purposes
-            const mockFile = new File(['Demo Report'], sampleData.fileName, { type: 'application/pdf' });
-            setFile(mockFile);
-            setPages([]); // No actual pages for demo
-
-            setAnalysisStep('identifying');
-            setRawText(sampleData.rawText);
-            setPreviewData(sampleData.previewData);
-
-            setAnalysisStep('complete');
-
-        } catch (err) {
-            console.error('Failed to load demo:', err);
-            alert('Failed to load sample report.');
-            setIsDemoMode(false);
-        } finally {
-            setIsProcessing(false);
-            setAnalysisStep(null);
-        }
-    };
 
     // --- RENDER ---
 
     if (!file && !isRestoring) {
         return (
-            <div className="min-h-screen flex flex-col bg-gray-50">
-                <Header isPaid={isPaid} hasFile={false} />
-                <div className="flex-1 flex flex-col items-center justify-center p-4 gap-12">
-                    <div className="text-center space-y-4 max-w-2xl mx-auto mt-8 sm:mt-16">
-                        <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-900 tracking-tight leading-tight">
-                            {routeConfig.h1}
-                        </h1>
-                        <p className="text-lg sm:text-lg text-gray-900 font-medium max-w-xl mx-auto border border-blue-100 bg-blue-50 p-4 rounded-lg">
-                            {routeConfig.disclaimer}
-                        </p>
-                        <p className="text-gray-600 max-w-xl mx-auto leading-relaxed">
-                            {routeConfig.subhead}
-                        </p>
-
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm text-sm text-gray-600">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            {routeConfig.trustSignals}
-                        </div>
-                    </div>
-
-                    <PDFUploader onFileSelect={handleFileSelect} isProcessing={isProcessing} ctaText={routeConfig.ctaText} />
-
-                    {/* Demo Button */}
-                    <button
-                        onClick={handleLoadDemo}
-                        disabled={isProcessing}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm underline underline-offset-2 transition-colors disabled:opacity-50"
-                    >
-                        Or try a free sample report →
-                    </button>
-
-                    <div className="grid sm:grid-cols-3 gap-8 max-w-5xl w-full px-4 text-center">
-                        {routeConfig.whyThisMatters.map((bullet, idx) => (
-                            <div key={idx} className="space-y-2 p-4 bg-white rounded-xl shadow-sm border border-gray-100 transform hover:scale-105 transition-transform">
-                                <div className="font-semibold text-gray-900 text-lg">{bullet.title}</div>
-                                <p className="text-base text-gray-500 leading-relaxed">{bullet.text}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex-1" />
-                    <Footer />
-                </div>
-            </div>
+            <LandingPageTemplate
+                config={routeConfig}
+                onFileSelect={handleFileSelect}
+                isProcessing={isProcessing}
+            />
         );
     }
 
@@ -369,7 +296,7 @@ export function Workspace() {
                 hasFile={true}
                 onExport={handleExport}
                 file={file}
-                isDemoMode={isDemoMode}
+                isDemoMode={false}
             />
 
             {/* Main Workspace: Split View */}
