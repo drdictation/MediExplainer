@@ -1,47 +1,41 @@
 import type { FullExplanation } from './types';
 
-// REVISED SAFETY LOGIC: Claim-based, not vocabulary-based.
-// We allow "cancer", "tumor", etc., but block diagnosis and treatment advice.
+// MVP SAFETY SPEC: Claim-based Blocking Only
+// We allow "cancer", "tumor", etc.
+// We block strict diagnosis ("You have") and prognosis ("survival").
 
-const DIAGNOSTIC_PATTERNS = [
+const DIAGNOSTIC_CLAIMS = [
     /you have/i,
-    /you are diagnosed with/i,
-    /this confirms/i,
-    /we confirm/i,
-    /evidence of (definite|certain)/i
+    /you need/i,
+    /you should/i,
+    /start (taking|treatment)/i,
+    /stop (taking|treatment)/i,
+    /your diagnosis is/i
 ];
 
-const CERTAINTY_PATTERNS = [
-    /definitely/i,
-    /without (a )?doubt/i,
-    /guaranteed/i,
-    /100%/
+const PROGNOSIS_CLAIMS = [
+    /prognosis/i,
+    /survival rate/i,
+    /life expectancy/i,
+    /terminal (illness|cancer)/i,
+    /cure/i
 ];
 
-const TREATMENT_PATTERNS = [
-    /start (taking|using)/i,
-    /stop (taking|using)/i,
-    /prescribe/i,
-    /surgery is required/i,
-    /you need (chemotherapy|radiation)/i,
-    /consult your doctor immediately/i // Alarmist
-];
-
-// Fallback message when a term cannot be safely explained
-export const FALLBACK_MSG = "This term appears in your report, but explaining it safely requires discussion with your clinician.";
+// If the Emergency Brake triggers (rare), we use this neutral educational fallback.
+// We avoid "Unavailable" to reduce user anxiety.
+export const FALLBACK_MSG = "This term is discussed in the report. For a specific interpretation of how it applies to you, please consult your clinician.";
 
 /**
  * Deterministic check for disallowed speech acts.
- * Returns true if the text is safe (no diagnosis/advice).
+ * Returns true if the text is safe (no diagnosis/prognosis/treatment).
  */
 export function isSafeText(text: string): boolean {
     if (!text) return true;
 
     // Check all banned patterns
     const allPatterns = [
-        ...DIAGNOSTIC_PATTERNS,
-        ...CERTAINTY_PATTERNS,
-        ...TREATMENT_PATTERNS
+        ...DIAGNOSTIC_CLAIMS,
+        ...PROGNOSIS_CLAIMS
     ];
 
     for (const pattern of allPatterns) {
@@ -75,7 +69,6 @@ export function sanitizeExplanation(explanation: FullExplanation): FullExplanati
     // 3. Sanitize Glossary
     sanitized.glossary = sanitized.glossary.map(t => {
         // If the definition contains unsafe claims, fallback.
-        // We do NOT block words like "cancer" anymore.
         if (!isSafeText(t.definition)) {
             return { ...t, definition: FALLBACK_MSG };
         }
@@ -90,7 +83,7 @@ export function sanitizeExplanation(explanation: FullExplanation): FullExplanati
         return q;
     });
 
-    // 5. Sanitize Disclaimer (ensure it's not empty, though usually static)
+    // 5. Sanitize Disclaimer
     if (!sanitized.disclaimer) {
         sanitized.disclaimer = "This explanation is for educational purposes only and does not constitute medical advice.";
     }

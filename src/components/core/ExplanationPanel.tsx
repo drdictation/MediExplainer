@@ -192,7 +192,7 @@ export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnloc
                     <span className="text-xs text-gray-400">AI Explainer</span>
                 </div>
                 <p className="text-xs text-gray-500 leading-tight">
-                    This tool explains plain language only. <span className="font-semibold text-gray-700">It does not provide medical advice or diagnosis.</span>
+                    This explanation describes how clinicians typically interpret report wording. <span className="font-semibold text-gray-700">It does not provide medical advice or recommendations.</span>
                 </p>
             </div>
 
