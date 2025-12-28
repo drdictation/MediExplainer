@@ -39,7 +39,18 @@ export function EmailModal({ isOpen, onClose, explanationData, fileName }: Props
                 })
             });
 
-            const data = await res.json();
+            // Handle non-JSON responses (like 404 HTML from Vite)
+            const contentType = res.headers.get("content-type");
+            let data;
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                data = await res.json();
+            } else {
+                // If text/html, it's likely a 404 from Vite
+                if (res.status === 404) {
+                    throw new Error('API Route Not Found. If testing locally, use "vercel dev" instead of "npm run dev".');
+                }
+                throw new Error(`Server returned ${res.status} (Not JSON)`);
+            }
 
             if (res.ok && data.success) {
                 setStatus('success');

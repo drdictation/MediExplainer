@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
         const htmlContent = generateEmailHTML(explanation, fileName);
 
         const { data, error } = await resend.emails.send({
-            from: 'ExplainMyMedicalReport <noreply@explainmymedicalreport.com>',
+            from: 'ExplainMyMedicalReport <onboarding@resend.dev>',
             to: [email],
             subject: `Your Medical Report Explanation - ${fileName || 'Report'}`,
             html: htmlContent,
@@ -31,7 +31,8 @@ export default async function handler(req: any, res: any) {
 
         if (error) {
             console.error('[Email API] Resend error:', error);
-            return res.status(500).json({ error: 'Failed to send email' });
+            // Return the specific error message from Resend (e.g., "can only send to own email")
+            return res.status(500).json({ error: error.message || 'Failed to send email' });
         }
 
         console.log('[Email API] Email sent successfully:', data?.id);
