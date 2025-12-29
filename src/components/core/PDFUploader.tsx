@@ -112,7 +112,7 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
                     {/* Trust Badge */}
                     <div className="bg-green-50 px-3 py-1 rounded-full border border-green-100 flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-xs font-medium text-green-700">Client-side only • No server upload</span>
+                        <span className="text-xs font-medium text-green-700">Private Processing • No Data Stored</span>
                     </div>
 
                     <div className={cn(

@@ -8,11 +8,19 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
+        // Use intro price if available, otherwise fall back to standard price
+        const priceId = process.env.STRIPE_PRICE_ID_INTRO || process.env.STRIPE_PRICE_ID_STANDARD || process.env.STRIPE_PRICE_ID;
+
+        if (!priceId) {
+            console.error("No Stripe Price ID configured");
+            return res.status(500).json({ error: 'Payment configuration error' });
+        }
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: process.env.STRIPE_PRICE_ID_STANDARD || process.env.STRIPE_PRICE_ID, // Use dedicated env var
+                    price: priceId,
                     quantity: 1,
                 },
             ],

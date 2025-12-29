@@ -64,7 +64,7 @@ export function Workspace() {
                         // Fire Google Ads Conversion + Analytics
                         track('purchase_completed', {
                             transaction_id: sessionId,
-                            value: 19.99,
+                            value: 9.99,
                             currency: 'USD',
                             page_path: window.location.pathname
                         });

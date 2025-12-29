@@ -54,14 +54,22 @@ export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnloc
                 <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-gray-100">
                     <Lock className="w-10 h-10 text-blue-600 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Unlock Full Explanation</h3>
-                    <p className="text-gray-600 mb-6 text-sm">
+                    <p className="text-gray-600 mb-4 text-sm">
                         Get plain-language summaries, defined terms, and questions to ask your doctor.
                     </p>
+                    {/* Intro Offer Badge */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="text-amber-600 text-xs font-bold uppercase tracking-wide">Launch Offer</span>
+                            <span className="text-gray-400 line-through text-sm">$19.99</span>
+                            <span className="text-green-600 font-bold text-lg">$9.99</span>
+                        </div>
+                    </div>
                     <button
                         onClick={onUnlock}
                         className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all transform hover:scale-[1.02]"
                     >
-                        Unlock for $19.99
+                        Unlock for $9.99
                     </button>
                     <p className="text-xs text-gray-400 mt-4">
                         One-time payment. Secure processing.

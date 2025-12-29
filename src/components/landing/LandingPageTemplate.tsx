@@ -112,7 +112,16 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
 
                 {/* CTA - Primary Action */}
                 <section className="scroll-mt-20 -mt-8" id="upload">
-                    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden max-w-3xl mx-auto">
+                    {/* Intro Offer Banner */}
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-t-2xl max-w-3xl mx-auto text-center shadow-lg">
+                        <div className="flex items-center justify-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold">🎉 Launch Offer:</span>
+                            <span className="text-white/80 line-through text-sm">$19.99</span>
+                            <span className="text-xl font-bold">$9.99</span>
+                            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Limited Time</span>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-b-2xl shadow-xl border border-slate-200 border-t-0 overflow-hidden max-w-3xl mx-auto">
                         <div className="p-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-100" />
                         <div className="p-6 sm:p-8 text-center space-y-6">
                             <h2 className="text-lg font-semibold text-slate-900 hidden sm:block">
