@@ -5,8 +5,7 @@ import { renderPageToCanvas } from './pdf-engine';
 
 export async function exportRedactedPDF(
     originalFile: File,
-    redactions: Redaction[],
-    isPaid: boolean
+    redactions: Redaction[]
 ): Promise<Uint8Array> {
     const arrayBuffer = await originalFile.arrayBuffer();
     console.log('[Export] Loaded array buffer, size:', arrayBuffer.byteLength);
@@ -34,19 +33,7 @@ export async function exportRedactedPDF(
 
         const { width, height } = canvas;
 
-        // 2. Draw Watermark if not paid (LAYER BEHIND)
-        if (!isPaid) {
-            ctx.save();
-            ctx.globalAlpha = 0.3;
-            ctx.font = `bold ${height / 20}px sans-serif`;
-            ctx.fillStyle = 'red';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.translate(width / 2, height / 2);
-            ctx.rotate(-Math.PI / 4);
-            ctx.fillText('PREVIEW - REDACTPDF.COM', 0, 0);
-            ctx.restore();
-        }
+
 
         // 3. Draw Redactions (LAYER ON TOP)
         ctx.fillStyle = '#000000';

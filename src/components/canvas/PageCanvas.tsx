@@ -12,7 +12,6 @@ interface PageCanvasProps {
     onAddRedaction: (redaction: Redaction) => void;
     onRemoveRedaction: (id: string) => void;
     isActive?: boolean;
-    isPaid?: boolean;
 }
 
 export function PageCanvas({
@@ -21,8 +20,7 @@ export function PageCanvas({
     scale = 2.0, // High DPI render
     redactions,
     onAddRedaction,
-    onRemoveRedaction,
-    isPaid = false
+    onRemoveRedaction
 }: PageCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -107,19 +105,7 @@ export function PageCanvas({
                 style={{ width: '100%' }} // Responsive width
             />
 
-            {/* Watermark Overlay (Middle Layer: z-10) */}
-            {!isPaid && (
-                <>
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-30 z-10">
-                        <div className="transform -rotate-45 text-red-500 font-bold text-4xl sm:text-6xl whitespace-nowrap select-none border-4 border-red-500 p-4 rounded-xl">
-                            PREVIEW - REDACTPDF.COM
-                        </div>
-                    </div>
-                    <div className="absolute bottom-2 right-2 z-30 bg-white/80 px-2 py-1 text-[10px] text-gray-500 rounded border shadow-sm pointer-events-none">
-                        Preview with watermark
-                    </div>
-                </>
-            )}
+
 
             {/* Existing Redactions (Top Layer: z-20) */}
             {redactions.filter(r => r.pageIndex === pageIndex).map(r => (
