@@ -354,7 +354,6 @@ export function Workspace() {
                                 redactions={[]} // No visual redactions for now
                                 onAddRedaction={() => { }} // Disabled
                                 onRemoveRedaction={() => { }}
-                                isPaid={isPaid}
                             />
                         </div>
                     ))}
