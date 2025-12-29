@@ -9,10 +9,10 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { text, mode, images } = req.body;
+    const { text, mode, images, inlineData } = req.body;
 
-    if (!text && (!images || images.length === 0)) {
-        return res.status(400).json({ error: 'No text or images provided' });
+    if (!text && (!images || images.length === 0) && !inlineData) {
+        return res.status(400).json({ error: 'No text or images/PDF provided' });
     }
 
     if (!process.env.GEMINI_API_KEY) {
@@ -36,7 +36,7 @@ export default async function handler(req: any, res: any) {
 
                 const parts: any[] = [{ text: systemInstruction + "\n\n" + prompt }];
                 if (imageParts && imageParts.length > 0) {
-                    console.log(`[API] Attaching ${imageParts.length} images to request...`);
+                    console.log(`[API] Attaching ${imageParts.length} media parts to request...`);
                     parts.push(...imageParts);
                 }
 
@@ -57,15 +57,23 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
-        // Prepare Images if any
-        let imageParts: any[] = [];
+        // Prepare Media Parts (Images + PDF)
+        let mediaParts: any[] = [];
+
+        // 1. Images
         if (images && Array.isArray(images)) {
-            imageParts = images.map(b64 => ({
+            mediaParts.push(...images.map(b64 => ({
                 inlineData: {
                     data: b64,
                     mimeType: "image/jpeg"
                 }
-            }));
+            })));
+        }
+
+        // 2. Raw PDF
+        if (inlineData) {
+            console.log(`[API] Attaching Raw PDF Data (${inlineData.data.length} chars)...`);
+            mediaParts.push({ inlineData });
         }
 
         // PHASES IMPLEMENTATION
@@ -95,7 +103,7 @@ export default async function handler(req: any, res: any) {
         `;
             const prompt = images?.length ? "Analyze these scanned document images:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
 
-            const jsonString = await generateWithFallback(systemInstruction, prompt, imageParts);
+            const jsonString = await generateWithFallback(systemInstruction, prompt, mediaParts);
             return res.status(200).json(JSON.parse(jsonString));
         }
 
@@ -131,7 +139,7 @@ export default async function handler(req: any, res: any) {
 
         // Call Model for Phase 1
         const phase1Parts: any[] = [{ text: phase1System + "\n\n" + phase1Prompt }];
-        if (imageParts && imageParts.length > 0) phase1Parts.push(...imageParts);
+        if (mediaParts && mediaParts.length > 0) phase1Parts.push(...mediaParts);
 
         // Direct call for Phase 1
         const phase1Result = await model.generateContent({ contents: [{ role: "user", parts: phase1Parts }] });

@@ -1,11 +1,16 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { extractTextFromPage, renderPageToImage } from '../pdf-engine';
+import { extractTextFromPage } from '../pdf-engine';
 
 /**
- * Extracts text OR images from the PDF.
- * If text content is very low (scanned), returns images for vision analysis.
+ * Extracts text OR images/PDF-data from the PDF.
+ * If text content is very low (scanned), returns raw PDF data for Gemini 1.5/2.0 native analysis.
  */
-export async function extractTextFromPDF(pdf: pdfjsLib.PDFDocumentProxy): Promise<{ fullText: string; pageTexts: string[]; images?: string[] }> {
+export async function extractTextFromPDF(pdf: pdfjsLib.PDFDocumentProxy): Promise<{
+    fullText: string;
+    pageTexts: string[];
+    images?: string[];
+    inlineData?: { mimeType: string; data: string };
+}> {
     const pageTexts: string[] = [];
     let totalTextLength = 0;
 
@@ -18,23 +23,34 @@ export async function extractTextFromPDF(pdf: pdfjsLib.PDFDocumentProxy): Promis
     }
 
     const fullText = pageTexts.join('\n\n');
+    console.log(`[extractText] Total text length: ${totalTextLength} chars`);
 
-    // 2. Check for Scanned Document (Threshold: < 50 chars per page on average? or just total < 100)
-    // Adjust threshold as needed. 100 chars total for a report is suspicious.
+    // 2. Check for Scanned Document / Photo PDF
     if (totalTextLength < 100) {
-        console.warn("Low text detected. Promoting to Vision Mode (Scanned Document).");
-        const images: string[] = [];
+        console.warn("[extractText] Low text detected (<100 chars). Sending RAW PDF to Gemini.");
 
-        // Limit to first 5 pages to save bandwidth/tokens for MVP
-        const pagesToRender = Math.min(pdf.numPages, 5);
+        try {
+            // Get the raw PDF data
+            const data = await pdf.getData();
+            // Convert Unit8Array to Base64 manually to avoid dependencies
+            let binary = '';
+            const len = data.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(data[i]);
+            }
+            const base64 = btoa(binary);
 
-        for (let i = 1; i <= pagesToRender; i++) {
-            const page = await pdf.getPage(i);
-            const base64 = await renderPageToImage(page);
-            images.push(base64);
+            console.log(`[extractText] PDF converted to Base64 (${base64.length} chars). Sending...`);
+
+            return {
+                fullText: "",
+                pageTexts: [],
+                inlineData: { mimeType: 'application/pdf', data: base64 }
+            };
+
+        } catch (e) {
+            console.error("[extractText] Failed to get PDF data:", e);
         }
-
-        return { fullText: "", pageTexts: [], images };
     }
 
     return {

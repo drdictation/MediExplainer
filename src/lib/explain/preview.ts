@@ -4,10 +4,11 @@ import { analyzeText } from '../gemini';
 
 export async function generatePreview(pdf: any): Promise<PreviewData> {
     // 1. Extract Text & Images (if scanned)
-    const { fullText, images } = await extractTextFromPDF(pdf);
+    const { fullText, images, inlineData } = await extractTextFromPDF(pdf);
 
     // 2. Fallback for empty docs
-    if (!fullText && (!images || images.length === 0)) {
+    if (!fullText && (!images || images.length === 0) && !inlineData) {
+        console.warn("[generatePreview] No text AND no images/PDF-data found in PDF explainer flow.");
         return {
             reportType: 'general',
             detectedSections: [],
@@ -18,8 +19,8 @@ export async function generatePreview(pdf: any): Promise<PreviewData> {
     }
 
     try {
-        console.log("Requesting Gemini Preview Analysis (Client-Side)...");
-        const data = await analyzeText(fullText, 'preview', images);
+        console.log(`[generatePreview] Requesting Gemini Analysis. TextLen: ${fullText.length}, Images: ${images?.length || 0}, PDF: ${!!inlineData}`);
+        const data = await analyzeText(fullText, 'preview', images, inlineData);
 
         return {
             reportType: data.reportType,

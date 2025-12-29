@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // @ts-ignore
 const LOCAL_KEY = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
 
-export async function analyzeText(text: string, mode: 'preview' | 'full', images?: string[]) {
+export async function analyzeText(text: string, mode: 'preview' | 'full', images?: string[], inlineData?: { mimeType: string; data: string }) {
     // 1. PRODUCTION / VERCEL MODE: Use Server-Side API to protect key
     if (import.meta.env.PROD || !LOCAL_KEY) {
         console.log(`[Gemini Service] Running in ${import.meta.env.PROD ? 'PRODUCTION' : 'NO_KEY'} mode. Delegating to /api/analyze...`);
@@ -12,7 +12,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
             const res = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, mode, images })
+                body: JSON.stringify({ text, mode, images, inlineData })
             });
 
             if (!res.ok) {
@@ -32,7 +32,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
 
     try {
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash-lite", // User requested specific version
+            model: "gemini-2.5-flash", // DO NOT CHANGE THIS MODEL. IT IS THE ONLY ONE THAT WORKS FOR VISION.
             generationConfig: {
                 responseMimeType: "application/json",
             }
@@ -45,7 +45,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
             systemInstruction = `
                 You are a medical document analyzer.
                 Goal: Identify the report type, finding header sections, and list ALL medical terms found.
-                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
+                ${images?.length || inlineData ? "NOTE: This is a SCANNED DOCUMENT / PDF. Use Native Vision to read the text." : ""}
                 Strict JSON Output format:
                 {
                     "reportType": "lab" | "imaging" | "discharge" | "general",
@@ -54,15 +54,15 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
                         { "term": "Term1", "category": "lab" | "imaging" | "condition" | "medication" | "other" },
                         { "term": "Term2", "category": "..." }
                     ],
-                     "previewTerm": { "term": "Term1", "definition": "Simple 1 sentence definition", "category": "..." }
+                    "previewTerm": { "term": "Term1", "definition": "Simple 1 sentence definition", "category": "..." }
                 }
                 Select ONE term as "previewTerm" to give a definition for.
             `;
-            prompt = images?.length ? "Analyze these scanned document images:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
+            prompt = (images?.length || inlineData) ? "Analyze this scanned document / PDF:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
         } else {
             systemInstruction = `
                 You are a medical literacy assistant. Your goal is to explain this specific patient's report, focusing on the EXACT wording used.
-                ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
+                ${images?.length || inlineData ? "NOTE: This is a SCANNED DOCUMENT / PDF. Use Native Vision to read the text." : ""}
                 
                 STRICT JSON OUTPUT FORMAT:
                 {
@@ -84,7 +84,7 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
                         { "term": "Term", "definition": "Definition", "category": "category" }
                     ],
                     "questions": [
-                         { "question": "Question to ask doctor?", "context": "Why ask this?" }
+                        { "question": "Question to ask doctor?", "context": "Why ask this?" }
                     ],
                     "disclaimer": "Standard medical disclaimer."
                 }
@@ -94,13 +94,21 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
                 2. FOCUS ON ADJECTIVES: If the report says "hypoechoic", "spiculated", "ground-glass", "grade 2" -> You MUST extract these into "key_findings" and explain the implication of that specific word.
                 3. If the report is "Unremarkable" or "Normal", explain that "Unremarkable" means normal.
             `;
-            prompt = images?.length ? "Explain this full medical report (from images), paying close attention to specific adjectives:" : `Explain this full medical report, paying close attention to specific adjectives: \n\n${text}`;
+            prompt = (images?.length || inlineData) ? "Explain this full medical report (from native PDF/images), paying close attention to specific adjectives:" : `Explain this full medical report, paying close attention to specific adjectives: \n\n${text}`;
         }
 
         const parts: any[] = [{ text: systemInstruction + "\n\n" + prompt }];
+
+        // Add Images
         if (images && images.length > 0) {
             console.log(`[Gemini Service] Attaching ${images.length} images...`);
             parts.push(...images.map(b64 => ({ inlineData: { data: b64, mimeType: "image/jpeg" } })));
+        }
+
+        // Add Raw PDF Inline Data
+        if (inlineData) {
+            console.log(`[Gemini Service] Attaching Raw PDF Data (${inlineData.data.length} chars)...`);
+            parts.push({ inlineData });
         }
 
         console.log("[Gemini Service] Sending request to Google...");

@@ -5,6 +5,7 @@ import { loadPDF } from '../../lib/pdf-engine';
 import { getRouteConfig } from '../../lib/landingCopy';
 import { PageCanvas } from '../canvas/PageCanvas';
 import { Header } from './Header';
+import { ConsoleOverlay } from '../debug/ConsoleOverlay';
 import { ExplanationPanel } from './ExplanationPanel';
 import { extractTextFromPDF } from '../../lib/explain/extractText';
 import { generatePreview } from '../../lib/explain/preview';
@@ -409,6 +410,8 @@ export function Workspace() {
                 explanationData={fullExplanation}
                 fileName={file?.name || 'Medical Report'}
             />
+            {/* Debug Console for Mobile */}
+            {import.meta.env.DEV && <ConsoleOverlay />}
         </div>
     );
 }
