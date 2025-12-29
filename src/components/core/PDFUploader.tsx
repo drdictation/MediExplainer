@@ -1,8 +1,11 @@
+import { useState, useCallback } from 'react';
+import { convertImageToPDF } from '../../lib/pdf-engine';
+import { Camera, FileWarning, Loader2, Upload } from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { track } from '../../lib/analytics';
-import React, { useCallback, useState } from 'react';
-import { Upload, FileWarning, Loader2 } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+
+const MAX_SIZE_MB = 10;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 interface PDFUploaderProps {
     onFileSelect: (file: File) => void;
@@ -10,20 +13,15 @@ interface PDFUploaderProps {
     ctaText?: string;
 }
 
-const MAX_SIZE_MB = 10;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-
-export function cn(...inputs: (string | undefined | null | false)[]) {
-    return twMerge(clsx(inputs));
-}
-
 export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Select PDF to Redact' }: PDFUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isConverting, setIsConverting] = useState(false);
 
     const validateFile = (file: File): string | null => {
-        if (file.type !== 'application/pdf') {
-            return 'Please upload a valid PDF file.';
+        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            return 'Please upload a valid PDF or Image (JPG/PNG).';
         }
         if (file.size > MAX_SIZE_BYTES) {
             return `File size exceeds ${MAX_SIZE_MB}MB limit.`;
@@ -31,33 +29,48 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
         return null;
     };
 
-    const handleFile = (file: File) => {
+    const handleFile = async (file: File) => {
         const errorMsg = validateFile(file);
         if (errorMsg) {
             setError(errorMsg);
             return;
         }
         setError(null);
-        onFileSelect(file);
+
+        // If it's an image, convert to PDF first
+        if (file.type.startsWith('image/')) {
+            setIsConverting(true);
+            try {
+                const pdfFile = await convertImageToPDF(file);
+                onFileSelect(pdfFile);
+            } catch (err: any) {
+                console.error('Image conversion failed:', err);
+                setError('Failed to process image. Please try a PDF.');
+            } finally {
+                setIsConverting(false);
+            }
+        } else {
+            onFileSelect(file);
+        }
     };
 
     const onDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
 
-        if (isProcessing) return;
+        if (isProcessing || isConverting) return;
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             handleFile(e.dataTransfer.files[0]);
         }
-    }, [isProcessing]);
+    }, [isProcessing, isConverting]);
 
     const onDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
-        if (!isProcessing) {
+        if (!isProcessing && !isConverting) {
             setIsDragging(true);
         }
-    }, [isProcessing]);
+    }, [isProcessing, isConverting]);
 
     const onDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -70,26 +83,29 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
         }
     };
 
+    const isBusy = isProcessing || isConverting;
+
     return (
-        <div className="w-full max-w-xl mx-auto">
+        <div className="w-full max-w-xl mx-auto space-y-4">
             <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 className={cn(
-                    "relative border-2 border-dashed rounded-xl p-12 transition-all duration-200 ease-in-out text-center cursor-pointer",
+                    "relative border-2 border-dashed rounded-xl p-8 sm:p-12 transition-all duration-200 ease-in-out text-center cursor-pointer",
                     isDragging ? "border-blue-500 bg-blue-50/50" : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50",
-                    isProcessing && "opacity-50 cursor-not-allowed pointer-events-none",
+                    isBusy && "opacity-50 cursor-not-allowed pointer-events-none",
                     error && "border-red-300 bg-red-50/30"
                 )}
             >
                 <input
                     type="file"
-                    accept="application/pdf"
+                    accept="application/pdf,image/jpeg,image/png"
                     onChange={onInputChange}
                     onClick={() => track('click_upload_cta', { source: 'uploader_dropzone' })}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                    disabled={isProcessing}
+                    disabled={isBusy}
+                    capture="environment" // Triggers camera on mobile
                 />
 
                 <div className="flex flex-col items-center gap-4">
@@ -103,42 +119,32 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
                         "p-4 rounded-full transition-colors",
                         error ? "bg-red-100 text-red-600" : "bg-blue-50 text-blue-600"
                     )}>
-                        {isProcessing ? (
+                        {isBusy ? (
                             <Loader2 className="w-8 h-8 animate-spin" />
                         ) : error ? (
                             <FileWarning className="w-8 h-8" />
                         ) : (
-                            <Upload className="w-8 h-8" />
+                            <div className="relative">
+                                <Upload className="w-8 h-8" />
+                                <Camera className="w-4 h-4 absolute -bottom-1 -right-1 bg-white rounded-full p-0.5" />
+                            </div>
                         )}
                     </div>
 
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">
-                            {isProcessing ? 'Processing PDF...' : ctaText}
+                            {isConverting ? 'Processing Image...' : isProcessing ? 'Analyzing Document...' : ctaText}
                         </h3>
                         <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                            {error || "Drag and drop or click to browse. Files never leave your device."}
+                            {error || "Upload PDF or Take a Clear Photo"}
                         </p>
                     </div>
 
-                    {!error && (
-                        <div className="text-xs text-gray-400 font-medium">
-                            Max {MAX_SIZE_MB}MB • PDF only
+                    {!error && !isBusy && (
+                        <div className="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-md">
+                            💡 Tip: Ensure good lighting if taking a photo
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* Mobile Warning - Desktop Recommended */}
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 sm:hidden">
-                <div className="p-1">
-                    <FileWarning className="w-4 h-4 text-amber-600" />
-                </div>
-                <div>
-                    <h4 className="text-sm font-medium text-amber-900">Desktop Recommended</h4>
-                    <p className="text-xs text-amber-700 mt-1">
-                        Redacting documents requires precise control. For the best experience, please use a desktop computer.
-                    </p>
                 </div>
             </div>
         </div>

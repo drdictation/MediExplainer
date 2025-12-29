@@ -128,10 +128,36 @@ export function ExplanationPanel({ isPaid, previewData, fullExplanation, onUnloc
             <div className="p-6 overflow-y-auto h-[calc(100vh-200px)]">
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
+                        {/* Summary Section */}
                         <div className="prose prose-blue max-w-none">
                             <h3 className="text-xl font-bold text-gray-900">Summary</h3>
                             <p className="text-gray-700 leading-relaxed">{fullExplanation.summary}</p>
                         </div>
+
+                        {/* KEY FINDINGS - The "Hook" Section */}
+                        {fullExplanation.key_findings && fullExplanation.key_findings.length > 0 && (
+                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 space-y-4">
+                                <h4 className="font-bold text-indigo-900 border-b border-indigo-200 pb-2 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" />
+                                    Specific Details Found
+                                </h4>
+                                <div className="space-y-3">
+                                    {fullExplanation.key_findings.map((item, idx) => (
+                                        <div key={idx} className="bg-white p-3 rounded-lg border border-indigo-50 shadow-sm">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="text-sm font-semibold text-gray-900">{item.finding}</span>
+                                                <span className="text-xs font-mono bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
+                                                    "{item.modifier}"
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 leading-tight">
+                                                {item.implication}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

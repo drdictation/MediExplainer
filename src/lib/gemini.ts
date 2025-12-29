@@ -61,12 +61,22 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
             prompt = images?.length ? "Analyze these scanned document images:" : `Analyze this text structure: \n\n${text.substring(0, 15000)}`;
         } else {
             systemInstruction = `
-                You are a medical literacy assistant. Explain this report to a patient in plain English.
+                You are a medical literacy assistant. Your goal is to explain this specific patient's report, focusing on the EXACT wording used.
                 ${images?.length ? "NOTE: This is a SCANNED DOCUMENT (Images). Use OCR to read the text." : ""}
-                Output JSON:
+                
+                STRICT JSON OUTPUT FORMAT:
                 {
                     "reportType": "string",
                     "summary": "2-3 sentence overall summary of findings",
+                    
+                    "key_findings": [
+                        {
+                            "finding": "e.g. Lung Nodule",
+                            "modifier": "e.g. Spiculated margin",
+                            "implication": "Explain EXACTLY what strictly this modifier means (e.g. 'Spiculated means spiked edges, which is a feature requiring closer follow-up')."
+                        }
+                    ],
+
                     "sections": [
                         { "originalTitle": "Findings", "summary": "Plain language explanation of this section..." }
                     ],
@@ -78,11 +88,13 @@ export async function analyzeText(text: string, mode: 'preview' | 'full', images
                     ],
                     "disclaimer": "Standard medical disclaimer."
                 }
+                
                 RULES:
                 1. No medical advice/diagnosis.
-                2. Explain terms simply.
+                2. FOCUS ON ADJECTIVES: If the report says "hypoechoic", "spiculated", "ground-glass", "grade 2" -> You MUST extract these into "key_findings" and explain the implication of that specific word.
+                3. If the report is "Unremarkable" or "Normal", explain that "Unremarkable" means normal.
             `;
-            prompt = images?.length ? "Explain this full medical report (from images):" : `Explain this full medical report: \n\n${text}`;
+            prompt = images?.length ? "Explain this full medical report (from images), paying close attention to specific adjectives:" : `Explain this full medical report, paying close attention to specific adjectives: \n\n${text}`;
         }
 
         const parts: any[] = [{ text: systemInstruction + "\n\n" + prompt }];

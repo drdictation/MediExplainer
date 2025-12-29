@@ -68,3 +68,36 @@ export async function renderPageToImage(page: pdfjsLib.PDFPageProxy, scale = 1.5
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
     return dataUrl.split(',')[1];
 }
+
+import { PDFDocument } from 'pdf-lib';
+
+/**
+ * Converts an image file (PNG/JPG) to a single-page PDF File.
+ */
+export async function convertImageToPDF(imageFile: File): Promise<File> {
+    const pdfDoc = await PDFDocument.create();
+    const imageBytes = await imageFile.arrayBuffer();
+
+    let image;
+    if (imageFile.type === 'image/jpeg' || imageFile.type === 'image/jpg') {
+        image = await pdfDoc.embedJpg(imageBytes);
+    } else if (imageFile.type === 'image/png') {
+        image = await pdfDoc.embedPng(imageBytes);
+    } else {
+        throw new Error('Unsupported image format. Please upload JPG or PNG.');
+    }
+
+    const page = pdfDoc.addPage([image.width, image.height]);
+    page.drawImage(image, {
+        x: 0,
+        y: 0,
+        width: image.width,
+        height: image.height,
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    return new File([pdfBytes as any], imageFile.name.split('.')[0] + '.pdf', {
+        type: 'application/pdf',
+        lastModified: Date.now(),
+    });
+}
