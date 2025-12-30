@@ -56,12 +56,14 @@ export function track(eventName: AnalyticsEvent, params: AnalyticsParams = {}) {
     if (typeof window.gtag === 'function') {
         window.gtag('event', eventName, {
             ...fullParams,
-            // Mapping for Google Ads specific needs
-            // upload_completed (Primary) -> AW-1775585311/UXJICN295tgbEP-d1ZJC
+            // Mapping for Google Ads specific needs + Keeping GA4 visibility
+            // upload_completed (Primary) -> AW... (Ads) AND G... (GA4)
             send_to:
-                eventName === 'upload_completed' ? 'AW-1775585311/UXJICN295tgbEP-d1ZJC' :
-                    eventName === 'purchase_completed' ? 'AW-1775585311/rtPjCMC9rNcbEP-d1ZJC' : // Verify this label if account changed
-                        undefined,
+                eventName === 'upload_completed'
+                    ? ['AW-1775585311/UXJICN295tgbEP-d1ZJC', 'G-CJBG9XDZ7M']
+                    : eventName === 'purchase_completed'
+                        ? ['AW-1775585311/rtPjCMC9rNcbEP-d1ZJC', 'G-CJBG9XDZ7M']
+                        : undefined,
         });
     } else {
         // Fallback or GTM dataLayer push if gtag generic func not ready but dataLayer is
