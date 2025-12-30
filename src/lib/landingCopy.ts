@@ -22,6 +22,12 @@ export interface RouteConfig {
     metaTitle: string;
     metaDescription: string;
     disclaimer: string;
+    // New Conversion Elements
+    offerBanner?: string; // e.g. "Launch Offer: $19.99 -> $9.99"
+    heroMicrocopy?: string; // Text below CTA
+    trustBadge?: string; // Override for specific trust badge text
+    previewGrid?: Array<{ icon: 'file' | 'book' | 'question'; title: string; description: string }>;
+    questionsTeaser?: { visible: string[]; blurred: string[]; unlockCta: string };
 }
 
 const COMMON_DISCLAIMER = "This tool explains medical language in plain terms. It does not provide medical advice, diagnosis, or treatment recommendations. Always consult a qualified clinician for health concerns.";
@@ -166,37 +172,73 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     '/lung-nodule-ct-scan-report-meaning': {
         path: '/lung-nodule-ct-scan-report-meaning',
         primarySearchIntent: 'Lung Nodule CT Scan',
-        h1: 'Lung Nodule on CT scan report: what it means',
-        subhead: 'Why the specific size and texture in your report matter more than the nodule finding itself',
-        summary: 'Lung nodules are extremely common and the vast majority are benign. However, terms like "ground-glass", "spiculated", or "calcified" completely change the safety profile. This tool explains your exact report wording to help you understand the context.',
+
+        // Variant A: Appointment Preparation Framing
+        h1: 'Prepare for Your Doctor Appointment About Your Lung Nodule',
+        subhead: 'Understand the exact wording in your CT report — and get the questions doctors expect you to ask.',
+
+        offerBanner: '🎉 Launch Offer: $19.99 → $9.99 (Limited Time)',
+        trustBadge: '🛡️ Private & Educational Only — No Diagnosis, No Medical Advice',
+        ctaText: 'Upload Report to Prepare',
+        heroMicrocopy: 'Free preview generated instantly. Full explanation with questions to ask your doctor available for $9.99.',
+
+        previewGrid: [
+            { icon: 'file', title: 'Report Wording Explained', description: 'We highlight the specific phrases that matter in your scan results' },
+            { icon: 'book', title: 'Key Terms Defined', description: 'Plain-English definitions for medical jargon like "ground-glass opacity"' },
+            { icon: 'question', title: 'Questions for Your Doctor', description: 'A list of specific, neutral questions tailored to your findings' }
+        ],
+
+        // Consolidated Educational Content
         definition: `
-            <p>A <strong>lung nodule</strong> is simply a "spot" or shadow seen on a scan. It describes <em>what it looks like</em>, not what it is.</p>
-            <ul>
-                <li><strong>Solitary Pulmonary Nodule:</strong> A single spot.</li>
-                <li><strong>Ground-glass opacity:</strong> A hazy spot (like frosted glass).</li>
-                <li><strong>Calcified:</strong> Contains calcium (often a sign of a sealed-off, old issue).</li>
-            </ul>
+            <h3>What does "lung nodule" mean on a CT scan?</h3>
+            <p>A <strong>lung nodule</strong> is simply a "spot" or shadow seen on a scan. It describes <em>what it looks like</em>, not what it is. Most nodules are found incidentally and are completely benign — often scars from old infections or small lymph nodes.</p>
         `,
         whyItAppears: `
-            <p>CT scanners are incredibly sensitive and see spots as small as a grain of rice. Common causes include:</p>
+            <h3>Why does "lung nodule" appear on so many reports?</h3>
+            <p>Modern CT scanners are incredibly sensitive. They detect spots as small as a few millimeters — things that might never have been seen on older equipment. Common causes include:</p>
             <ul>
                 <li><strong>Old Infections:</strong> Healed scars from past colds or fungal exposures.</li>
-                <li><strong>Lymph nodes:</strong> Small filters in the lung that serve the immune system.</li>
+                <li><strong>Lymph nodes:</strong> Small immune system filters in the lung.</li>
                 <li><strong>Inflammation:</strong> Reactive tissue from dust or allergies.</li>
             </ul>
         `,
         whatItDoesNotMean: `
-            <p>A nodule does <strong>NOT</strong> automatically mean lung cancer.</p>
-            <p>Over 95% of small nodules found on screening CTs are benign. The urgency depends on the size (millimeters matter) and stability (has it changed since last time?).</p>
-        `,
-        reportWording: `
-            <p>Radiologists use strict guidelines (Lung-RADS) to classify risk. Look for these keywords:</p>
+            <h3>What a lung nodule does NOT automatically mean</h3>
+            <p>Seeing "lung nodule" on your report does <strong>NOT</strong> automatically mean lung cancer.</p>
+            <p>Over 95% of small nodules found on screening CTs are benign. The urgency depends entirely on:</p>
             <ul>
-                <li><strong>"Spiculated":</strong> Edges that look spiked (a feature needing attention).</li>
-                <li><strong>"Smooth" or "Calcified":</strong> Features that strongly suggest a benign cause.</li>
-                <li><strong>"Stable":</strong> Unchanged from prior scans (the best news).</li>
+                <li><strong>The size:</strong> Millimeters matter.</li>
+                <li><strong>The texture:</strong> Solid vs. ground-glass.</li>
+                <li><strong>Stability:</strong> Has it changed compared to prior scans?</li>
             </ul>
         `,
+        reportWording: `
+            <h3>Report phrases that change the meaning</h3>
+            <p>Radiologists use specific vocabulary that carries different weight. Looking for these in your report is key:</p>
+            <ul>
+                <li><strong>"Spiculated":</strong> Edges that look spiked (a feature that may need closer follow-up).</li>
+                <li><strong>"Smooth" or "Calcified":</strong> Features that often suggest a benign cause.</li>
+                <li><strong>"Stable":</strong> Unchanged from prior scans (typically the most reassuring phrase).</li>
+                <li><strong>"Ground-glass":</strong> A hazy appearance that requires context to interpret.</li>
+            </ul>
+        `,
+
+        // Questions Teaser Section
+        questionsTeaser: {
+            visible: [
+                "What is the exact size of the nodule in millimeters?",
+                "Is it described as solid, ground-glass, or part-solid?"
+            ],
+            blurred: [
+                "Are there old scans to compare it to?",
+                "Does the report recommend a follow-up scan?",
+                "Is the nodule calcified?",
+                "What is the Lung-RADS score?"
+            ],
+            unlockCta: "Unlock all questions tailored to YOUR findings"
+        },
+
+        // Legacy / Fallback for SEO
         questions: [
             "What is the exact size of the nodule in millimeters?",
             "Is it described as solid, ground-glass, or part-solid?",
@@ -204,21 +246,25 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
             "Does the report recommend a follow-up scan in 3, 6, or 12 months?",
             "Is the nodule calcified?"
         ],
+
         faq: [
-            { question: "What size is dangerous?", answer: "Nodules under 6mm are very low risk. Nodules over 8mm generally require closer follow-up or testing." },
-            { question: "Can stress cause nodules?", answer: "No, but past infections or environmental irritants can cause inflammatory nodules." },
-            { question: "What is 'Watch and Wait'?", answer: "It is a safety protocol. Instead of risky surgery, doctors re-scan to see if the nodule grows. If it's stable for 2 years, it's usually safe." }
+            { question: "Is a lung nodule dangerous?", answer: "Not necessarily. The size, texture, and stability determine next steps. Most small nodules are benign." },
+            { question: "What size is considered concerning?", answer: "Nodules under 6mm are very low risk. Nodules over 8mm generally require closer follow-up or additional testing." },
+            { question: "Will I need surgery?", answer: "Most people don't. 'Watch and wait' (repeat scans to check stability) is the most common approach for small nodules." },
+            { question: "Does this tool give me a diagnosis?", answer: "No. We explain medical language and help you prepare questions for your doctor. Only a clinician can diagnose." },
+            { question: "Is my data private?", answer: "Yes. Your report is processed securely. We do not store your medical data permanently." }
         ],
         relatedTopics: [
             { title: "Low eGFR on Blood Test", path: "/low-egfr-blood-test-meaning" },
             { title: "IPMN Pancreas", path: "/what-is-ipmn-pancreas-ct-mri-report" }
         ],
-        whyThisMatters: [],
+        whyThisMatters: [], // Deprecated for this page, replaced by header content
         howThisWorks: 'Upload your Chest CT report.',
-        trustSignals: 'Private • Educational • Radiology Explainer',
-        ctaText: 'Explain My CT Report',
+        trustSignals: 'Secure Private Processing • No Diagnosis • Educational Only',
+
+        // SEO Metadata
         metaTitle: 'Lung Nodule on CT Scan Report | Meaning & Analysis',
-        metaDescription: 'Found a lung nodule on your CT scan? Learn why terms like "ground-glass" or "calcified" matter for understanding your report.',
+        metaDescription: 'Found a lung nodule on your CT scan? Prepare for your doctor appointment by understanding report wording like "ground-glass" or "calcified".',
         disclaimer: COMMON_DISCLAIMER
     },
 

@@ -5,7 +5,7 @@ import type { RouteConfig } from '../../lib/landingCopy';
 import { PDFUploader } from '../core/PDFUploader';
 import { Header } from '../core/Header';
 import { Footer } from '../core/Footer';
-import { AlertCircle, HelpCircle, FileText, ShieldCheck, ArrowRight } from 'lucide-react';
+import { AlertCircle, HelpCircle, FileText, ShieldCheck, ArrowRight, BookOpen, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { trackOnce } from '../../lib/analytics';
 
@@ -105,7 +105,7 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                     <div className="flex justify-center pt-2 pb-6">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 rounded-full border border-green-200 text-xs sm:text-sm text-green-800 font-medium">
                             <ShieldCheck className="w-4 h-4 text-green-600" />
-                            {config.trustSignals || "Private & Educational Only"}
+                            {config.trustBadge || config.trustSignals || "Private & Educational Only"}
                         </div>
                     </div>
                 </section>
@@ -113,14 +113,22 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                 {/* CTA - Primary Action */}
                 <section className="scroll-mt-20 -mt-8" id="upload">
                     {/* Intro Offer Banner */}
-                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-t-2xl max-w-3xl mx-auto text-center shadow-lg">
-                        <div className="flex items-center justify-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold">🎉 Launch Offer:</span>
-                            <span className="text-white/80 line-through text-sm">$19.99</span>
-                            <span className="text-xl font-bold">$9.99</span>
-                            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Limited Time</span>
+                    {(config.offerBanner || true) && (
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-t-2xl max-w-3xl mx-auto text-center shadow-lg">
+                            <div className="flex items-center justify-center gap-2 flex-wrap font-bold">
+                                {config.offerBanner ? (
+                                    <span>{config.offerBanner}</span>
+                                ) : (
+                                    <>
+                                        <span className="text-sm">🎉 Launch Offer:</span>
+                                        <span className="text-white/80 line-through text-sm">$19.99</span>
+                                        <span className="text-xl">$9.99</span>
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Limited Time</span>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="bg-white rounded-b-2xl shadow-xl border border-slate-200 border-t-0 overflow-hidden max-w-3xl mx-auto">
                         <div className="p-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-100" />
                         <div className="p-6 sm:p-8 text-center space-y-6">
@@ -128,12 +136,47 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                                 Upload your report to get a full explanation
                             </h2>
                             <PDFUploader onFileSelect={onFileSelect} isProcessing={isProcessing} ctaText={config.ctaText} />
-                            <p className="text-xs text-slate-400 mt-2">
-                                Free preview generated instantly. Full explanation available for purchase.
-                            </p>
+
+                            {/* Hero Microcopy */}
+                            {config.heroMicrocopy ? (
+                                <div className="space-y-3 pt-2">
+                                    <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                                        {config.heroMicrocopy}
+                                    </p>
+                                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-medium flex items-center justify-center gap-2">
+                                        <span>📁 PDF or photo accepted</span>
+                                        <span>•</span>
+                                        <span>🔒 Secure Private Processing</span>
+                                    </p>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-slate-400 mt-2">
+                                    Free preview generated instantly. Full explanation available for purchase.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </section>
+
+                {/* NEW: Value Preview Grid (What You'll Get) */}
+                {config.previewGrid && (
+                    <section className="max-w-4xl mx-auto">
+                        <div className="grid sm:grid-cols-3 gap-6">
+                            {config.previewGrid.map((item, idx) => {
+                                const Icon = item.icon === 'file' ? FileText : item.icon === 'book' ? BookOpen : HelpCircle;
+                                return (
+                                    <div key={idx} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-3">
+                                        <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                                            <Icon className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-900">{item.title}</h3>
+                                        <p className="text-sm text-slate-500 leading-relaxed">{item.description}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
 
                 {hasExtendedContent && (
                     <>
@@ -168,21 +211,74 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                         </section>
 
                         {/* 7. Questions to ask doctor */}
-                        <section className="bg-indigo-50 p-6 sm:p-8 rounded-2xl border border-indigo-100">
+                        <section className="bg-indigo-50 p-6 sm:p-8 rounded-2xl border border-indigo-100 relative overflow-hidden">
+                            {/* Header */}
                             <h2 className="text-2xl font-bold text-indigo-900 mb-6 flex items-center gap-3">
                                 <HelpCircle className="w-6 h-6 text-indigo-600" />
                                 Questions to ask your doctor
                             </h2>
-                            <ul className="space-y-3">
-                                {config.questions?.map((q, i) => (
-                                    <li key={i} className="flex items-start gap-3 bg-white p-4 rounded-lg shadow-sm text-indigo-900">
-                                        <div className="min-w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 mt-0.5">
-                                            {i + 1}
+
+                            {config.questionsTeaser ? (
+                                // Format: New Teaser (Visual/Blurred)
+                                <div className="space-y-4">
+                                    {/* Visible Questions */}
+                                    {config.questionsTeaser.visible.map((q, i) => (
+                                        <div key={`v-${i}`} className="flex items-start gap-3 bg-white p-4 rounded-lg shadow-sm text-indigo-900 border border-indigo-50">
+                                            <div className="min-w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 mt-0.5">
+                                                {i + 1}
+                                            </div>
+                                            <span className="font-medium">{q}</span>
                                         </div>
-                                        {q}
-                                    </li>
-                                ))}
-                            </ul>
+                                    ))}
+
+                                    {/* Blurred Questions Container */}
+                                    <div className="relative">
+                                        {/* The Content to Blur */}
+                                        <div className="space-y-4 filter blur-sm opacity-60 select-none pointer-events-none" aria-hidden="true">
+                                            {config.questionsTeaser.blurred.map((q, i) => (
+                                                <div key={`b-${i}`} className="flex items-start gap-3 bg-white p-4 rounded-lg shadow-sm text-indigo-900">
+                                                    <div className="min-w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 mt-0.5">
+                                                        {config.questionsTeaser!.visible.length + i + 1}
+                                                    </div>
+                                                    <span>{q}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Overlay Check/Lock */}
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center">
+                                            <button
+                                                onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
+                                                className="group flex flex-col items-center gap-3 bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-indigo-100 hover:scale-105 transition-transform"
+                                            >
+                                                <div className="p-3 bg-amber-100 rounded-full text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                                    <Lock className="w-6 h-6" />
+                                                </div>
+                                                <div className="text-center space-y-1">
+                                                    <div className="font-bold text-slate-900">
+                                                        {config.questionsTeaser.unlockCta}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">
+                                                        Included in Full Explanation ($9.99)
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Legacy Format
+                                <ul className="space-y-3">
+                                    {config.questions?.map((q, i) => (
+                                        <li key={i} className="flex items-start gap-3 bg-white p-4 rounded-lg shadow-sm text-indigo-900">
+                                            <div className="min-w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 mt-0.5">
+                                                {i + 1}
+                                            </div>
+                                            {q}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </section>
                     </>
                 )}
