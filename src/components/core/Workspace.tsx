@@ -221,6 +221,12 @@ export function Workspace() {
                 source: 'post_upload_preview'
             });
 
+            // Primary Conversion: Fire immediately when preview is ready
+            track('upload_completed', {
+                file_name: selectedFile.name,
+                page_count: loadedPages.length // Use local variable
+            });
+
             // Done - save state
             setAnalysisStep('complete');
             saveAppState({
@@ -233,10 +239,7 @@ export function Workspace() {
                 }
             });
 
-            track('upload_completed', {
-                file_name: selectedFile.name,
-                page_count: pages.length
-            });
+
 
         } catch (err) {
             console.error(err);
