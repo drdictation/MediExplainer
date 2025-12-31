@@ -60,9 +60,9 @@ export function track(eventName: AnalyticsEvent, params: AnalyticsParams = {}) {
             // upload_completed (Primary) -> AW... (Ads) AND G... (GA4)
             send_to:
                 eventName === 'upload_completed'
-                    ? ['AW-1775585311/UXJICN295tgbEP-d1ZJC', 'G-CJBG9XDZ7M']
+                    ? ['AW-17755885311/UXJICN295tgbEP-d1ZJC', 'G-CJBG9XDZ7M']
                     : eventName === 'purchase_completed'
-                        ? ['AW-1775585311/rtPjCMC9rNcbEP-d1ZJC', 'G-CJBG9XDZ7M']
+                        ? ['AW-17755885311/rtPjCMC9rNcbEP-d1ZJC', 'G-CJBG9XDZ7M']
                         : undefined,
         });
     } else {
