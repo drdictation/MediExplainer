@@ -197,29 +197,29 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
             <h3>Why does "lung nodule" appear on so many reports?</h3>
             <p>Modern CT scanners are incredibly sensitive. They detect spots as small as a few millimeters — things that might never have been seen on older equipment. Common causes include:</p>
             <ul>
-                <li><strong>Old Infections:</strong> Healed scars from past colds or fungal exposures.</li>
-                <li><strong>Lymph nodes:</strong> Small immune system filters in the lung.</li>
-                <li><strong>Inflammation:</strong> Reactive tissue from dust or allergies.</li>
+                <li><strong>Old Infections:</strong> Healed scars (granulomas) that mimic other spots.</li>
+                <li><strong>Lymph nodes:</strong> Small immune filters that can look like nodules.</li>
+                <li><strong>Inflammation:</strong> Reactive tissue that needs to be distinguished from growth.</li>
             </ul>
         `,
         whatItDoesNotMean: `
             <h3>What a lung nodule does NOT automatically mean</h3>
             <p>Seeing "lung nodule" on your report does <strong>NOT</strong> automatically mean lung cancer.</p>
-            <p>Over 95% of small nodules found on screening CTs are benign. The urgency depends entirely on:</p>
+            <p>However, risk is not just about size. A small nodule with specific "worrisome features" can be more concerning than a larger, smooth one. The urgency depends on the <strong>combination</strong> of:</p>
             <ul>
-                <li><strong>The size:</strong> Millimeters matter.</li>
-                <li><strong>The texture:</strong> Solid vs. ground-glass.</li>
-                <li><strong>Stability:</strong> Has it changed compared to prior scans?</li>
+                <li><strong>Size + Growth:</strong> Is it growing fast enough to be concerning?</li>
+                <li><strong>Density:</strong> Solid vs. Sub-solid changes the risk profile.</li>
+                <li><strong>Margins:</strong> The "shape" of the edges is a key predictor.</li>
             </ul>
         `,
         reportWording: `
             <h3>Report phrases that change the meaning</h3>
-            <p>Radiologists use specific vocabulary that carries different weight. Looking for these in your report is key:</p>
+            <p>Radiologists use specific vocabulary that changes your follow-up plan. This tool explains what these mean for <em>your</em> specific nodule:</p>
             <ul>
-                <li><strong>"Spiculated":</strong> Edges that look spiked (a feature that may need closer follow-up).</li>
-                <li><strong>"Smooth" or "Calcified":</strong> Features that often suggest a benign cause.</li>
-                <li><strong>"Stable":</strong> Unchanged from prior scans (typically the most reassuring phrase).</li>
-                <li><strong>"Ground-glass":</strong> A hazy appearance that requires context to interpret.</li>
+                <li><strong>"Spiculated":</strong> A descriptive term for the edges that triggers a different follow-up protocol.</li>
+                <li><strong>"Calcified":</strong> Detailed patterns of calcification (popcorn, laminated, diffuse) matter.</li>
+                <li><strong>"Ground-glass":</strong> A specific texture that requires checking against previous scans to interpret correctly.</li>
+                <li><strong>"Stable":</strong> The definition of "stable" depends on the time interval between scans.</li>
             </ul>
         `,
 
@@ -248,10 +248,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
         ],
 
         faq: [
-            { question: "Is a lung nodule dangerous?", answer: "Not necessarily. The size, texture, and stability determine next steps. Most small nodules are benign." },
-            { question: "What size is considered concerning?", answer: "Nodules under 6mm are very low risk. Nodules over 8mm generally require closer follow-up or additional testing." },
-            { question: "Will I need surgery?", answer: "Most people don't. 'Watch and wait' (repeat scans to check stability) is the most common approach for small nodules." },
-            { question: "Does this tool give me a diagnosis?", answer: "No. We explain medical language and help you prepare questions for your doctor. Only a clinician can diagnose." },
+            { question: "Is my lung nodule dangerous?", answer: "It depends. Danger is calculated using a 'Lung-RADS' score or 'Fleischner criteria', which combine size, texture, and history. This tool breaks down those criteria for you." },
+            { question: "What size is concerning?", answer: "There is no single 'safe' size. A 4mm nodule with spiculated edges might need a different plan than an 8mm smooth nodule. Context is everything." },
+            { question: "Will I need surgery?", answer: "Many nodules are managed with 'active surveillance' (repeat scans), but this decision depends on the 'doubling time' and density shown in your report." },
+            { question: "Does this tool give me a diagnosis?", answer: "No. We explain the medical language (like 'ground glass' or 'spiculated') so you can have a better conversation with your doctor." },
             { question: "Is my data private?", answer: "Yes. Your report is processed securely. We do not store your medical data permanently." }
         ],
         relatedTopics: [

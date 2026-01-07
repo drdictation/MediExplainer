@@ -5,6 +5,9 @@ import type { RouteConfig } from '../../lib/landingCopy';
 import { PDFUploader } from '../core/PDFUploader';
 import { Header } from '../core/Header';
 import { Footer } from '../core/Footer';
+import { TrustBar } from '../core/TrustBar';
+import { HowDataProtected } from './HowDataProtected';
+import { TestimonialBanner } from './TestimonialBanner';
 import { AlertCircle, HelpCircle, FileText, ShieldCheck, ArrowRight, BookOpen, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { trackOnce } from '../../lib/analytics';
@@ -81,7 +84,10 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
 
             <Header isPaid={false} hasFile={false} />
 
-            <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16">
+            {/* NEW: Trust Bar - Aggressive Privacy Messaging */}
+            <TrustBar />
+
+            <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12">
 
                 {/* 1. H1 & Hook (Hero) */}
                 <section className="text-center space-y-6">
@@ -157,6 +163,12 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                         </div>
                     </div>
                 </section>
+
+                {/* NEW: How Your Data is Protected */}
+                <HowDataProtected />
+
+                {/* NEW: Testimonial/Social Proof Banner */}
+                <TestimonialBanner />
 
                 {/* NEW: Value Preview Grid (What You'll Get) */}
                 {config.previewGrid && (

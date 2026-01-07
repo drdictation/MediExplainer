@@ -109,10 +109,10 @@ export function PDFUploader({ onFileSelect, isProcessing = false, ctaText = 'Sel
                 />
 
                 <div className="flex flex-col items-center gap-4">
-                    {/* Trust Badge */}
-                    <div className="bg-green-50 px-3 py-1 rounded-full border border-green-100 flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-xs font-medium text-green-700">Private Processing • No Data Stored</span>
+                    {/* Trust Badge - Aggressive Privacy Messaging */}
+                    <div className="bg-emerald-50 px-4 py-2 rounded-full border border-emerald-200 flex items-center gap-2 mb-2 shadow-sm">
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-xs font-semibold text-emerald-800">🔐 Bank-Level Encryption • Deleted After Processing • No Account Required</span>
                     </div>
 
                     <div className={cn(
