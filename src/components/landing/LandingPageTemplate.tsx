@@ -29,27 +29,49 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
 
     // Schema Generator
     const generateSchema = () => {
-        const schema = [
-            {
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": "Home",
-                        "item": `${window.location.origin}/`
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": config.h1,
-                        "item": `${window.location.origin}${config.path}`
-                    }
-                ]
-            }
-        ];
+        const schema = [];
 
+        // 1. BreadcrumbList
+        schema.push({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": `${window.location.origin}/`
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": config.h1,
+                    "item": `${window.location.origin}${config.path}`
+                }
+            ]
+        });
+
+        // 2. MedicalWebPage (Critical for this niche)
+        schema.push({
+            "@context": "https://schema.org",
+            "@type": "MedicalWebPage",
+            "name": config.h1,
+            "description": config.metaDescription,
+            "url": `${window.location.origin}${config.path}`,
+            "educationalUse": "Patient Education",
+            "audience": {
+                "@type": "Patient",
+                "audienceType": "patient"
+            },
+            "lastReviewed": new Date().toISOString().split('T')[0],
+            "about": {
+                "@type": "MedicalCondition",
+                "name": config.primarySearchIntent, // Using keyword as condition name
+                "alternateName": config.h1
+            }
+        });
+
+        // 3. FAQPage
         if (config.faq && config.faq.length > 0) {
             schema.push({
                 "@context": "https://schema.org",
@@ -62,7 +84,7 @@ export function LandingPageTemplate({ config, onFileSelect, isProcessing }: Land
                         "text": item.answer
                     }
                 }))
-            } as any);
+            });
         }
 
         return JSON.stringify(schema);

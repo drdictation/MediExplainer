@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://explainmymedicalreport.com/sitemap.xml

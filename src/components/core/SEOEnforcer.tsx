@@ -41,6 +41,12 @@ export function SEOEnforcer() {
 
             {/* Basic Open Graph */}
             <meta property="og:type" content="website" />
+
+            {/* Twitter Card Data */}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={routeConfig.metaTitle} />
+            <meta name="twitter:description" content={routeConfig.metaDescription} />
+            {/* If you have a specific OG image for each route, add it to config. For now, we can use a default or per-route if added later. */}
         </Helmet>
     );
 }
